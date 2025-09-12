@@ -1,0 +1,6 @@
+corrected_amqp.log
+*.xml
+*.csv
+*.json
+__pycache__/
+
