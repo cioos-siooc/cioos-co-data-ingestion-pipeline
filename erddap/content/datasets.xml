@@ -63,9 +63,9 @@
         <att name="license">[standard]</att>
         <att name="sourceUrl">(local files)</att>
         <att name="standard_name_vocabulary">CF Standard Name Table v70</att>
-        <att name="subsetVariables">latitude, longitude, stn_typ, wmo_synop_id, wmo_id_extnd, stn_nam, msc_id, stn_elev, crnt_buoy_lat_data_flag, crnt_buoy_long_data_flag, avg_air_temp_pst10mts_data_flag, avg_sea_sfc_temp_pst10mts_data_flag, avg_batry_volt_pst10mts_qa_summary, avg_batry_volt_pst10mts_data_flag, avg_solr_panl_crnt_pst10mts_data_flag, avg_wtr_lvl_snsr_volt_pst10mts, avg_wtr_lvl_snsr_volt_pst10mts_qa_summary, avg_wtr_lvl_snsr_volt_pst10mts_data_flag, avg_wave_hgt_pst20mts_data_flag, pk_wave_hgt_pst20mts_data_flag, sig_wave_pd_pst20mts_data_flag, sig_wave_hgt_pst20mts_data_flag, avg_max_wave_hgt_pst20mts_data_flag, avg_max_wave_pd_pst20mts_data_flag, avg_wave_pd_pst20mts_data_flag, pk_wave_pd_pst20mts_data_flag, avg_stn_pres_pst10mts_data_flag, avg_wnd_spd_pst10mts_data_flag, avg_wnd_dir_pst10mts_data_flag, max_avg_wnd_spd_pst10mts_data_flag, wnd_snsr_vert_disp, wnd_snsr_vert_disp_qa_summary, wnd_snsr_vert_disp_data_flag, pres_tend_char_pst3hrs_qa_summary, pres_tend_amt_pst3hrs_qa_summary, avg_mslp_pst10mts_qa_summary, avg_stn_pres_pst10mts_1_qa_summary, avg_stn_pres_pst10mts_1_data_flag, avg_stn_pres_pst10mts_2_qa_summary, avg_stn_pres_pst10mts_2_data_flag, avg_wnd_spd_pst10mts_1_qa_summary, avg_wnd_spd_pst10mts_1_data_flag, avg_wnd_spd_pst10mts_2_qa_summary, avg_wnd_spd_pst10mts_2_data_flag, avg_wnd_dir_pst10mts_1_qa_summary, avg_wnd_dir_pst10mts_1_data_flag, avg_wnd_dir_pst10mts_2_qa_summary, avg_wnd_dir_pst10mts_2_data_flag, max_avg_wnd_spd_pst10mts_1_qa_summary, max_avg_wnd_spd_pst10mts_1_data_flag, max_avg_wnd_spd_pst10mts_2_qa_summary, max_avg_wnd_spd_pst10mts_2_data_flag</att>
+        <att name="subsetVariables">latitude, longitude, stn_typ, wmo_synop_id, wmo_id_extnd, stn_nam, msc_id, stn_elev, crnt_buoy_lat_data_flag, crnt_buoy_long_data_flag, avg_air_temp_pst10mts_data_flag, avg_sea_sfc_temp_pst10mts_data_flag, avg_batry_volt_pst10mts_qa_summary, avg_batry_volt_pst10mts_data_flag, avg_solr_panl_crnt_pst10mts_data_flag, avg_wtr_lvl_snsr_volt_pst10mts, avg_wtr_lvl_snsr_volt_pst10mts_qa_summary, avg_wtr_lvl_snsr_volt_pst10mts_data_flag, avg_wave_hgt_pst20mts_data_flag, pk_wave_hgt_pst20mts_data_flag, sig_wave_pd_pst20mts_data_flag, sig_wave_hgt_pst20mts_data_flag, avg_max_wave_hgt_pst20mts_data_flag, avg_max_wave_pd_pst20mts_data_flag, avg_wave_pd_pst20mts_data_flag, pk_wave_pd_pst20mts_data_flag, avg_stn_pres_pst10mts_data_flag, avg_wnd_spd_pst10mts_data_flag, avg_wnd_dir_pst10mts_data_flag, max_avg_wnd_spd_pst10mts_data_flag, wnd_snsr_vert_disp, wnd_snsr_vert_disp_qa_summary, wnd_snsr_vert_disp_data_flag, pres_tend_amt_pst3hrs_qa_summary, pres_tend_char_pst3hrs_qa_summary, avg_mslp_pst10mts_qa_summary, avg_stn_pres_pst10mts_1_qa_summary, avg_stn_pres_pst10mts_1_data_flag, avg_stn_pres_pst10mts_2_qa_summary, avg_stn_pres_pst10mts_2_data_flag, avg_wnd_spd_pst10mts_1_qa_summary, avg_wnd_spd_pst10mts_1_data_flag, avg_wnd_spd_pst10mts_2_qa_summary, avg_wnd_spd_pst10mts_2_data_flag, avg_wnd_dir_pst10mts_1_qa_summary, avg_wnd_dir_pst10mts_1_data_flag, avg_wnd_dir_pst10mts_2_qa_summary, avg_wnd_dir_pst10mts_2_data_flag, max_avg_wnd_spd_pst10mts_1_qa_summary, max_avg_wnd_spd_pst10mts_1_data_flag, max_avg_wnd_spd_pst10mts_2_qa_summary, max_avg_wnd_spd_pst10mts_2_data_flag</att>
         <att name="summary">Data from a local source.</att>
-        <att name="testOutOfDate">now-30days</att>
+        <att name="testOutOfDate">now-2days</att>
         <att name="title">Data from a local source.</att>
     </addAttributes>
     <dataVariable>
@@ -73,14 +73,14 @@
         <destinationName>time</destinationName>
         <dataType>String</dataType>
         <!-- sourceAttributes>
-            <att name="standard_name">time</att>
-            <att name="units">yyyy-MM-dd&#39;T&#39;HH:mm:ssZ</att>
+            <att name="units">yyyy-MM-dd&#39;T&#39;HH:mm:ss.SSSZ</att>
         </sourceAttributes -->
         <addAttributes>
             <att name="ioos_category">Time</att>
             <att name="long_name">Date Tm</att>
             <att name="source_name">date_tm</att>
-            <att name="time_precision">1970-01-01T00:00:00Z</att>
+            <att name="standard_name">time</att>
+            <att name="time_precision">1970-01-01T00:00:00.000Z</att>
         </addAttributes>
     </dataVariable>
     <dataVariable>
@@ -1097,51 +1097,6 @@
         </addAttributes>
     </dataVariable>
     <dataVariable>
-        <sourceName>pres_tend_char_pst3hrs</sourceName>
-        <destinationName>pres_tend_char_pst3hrs</destinationName>
-        <dataType>float</dataType>
-        <!-- sourceAttributes>
-            <att name="units">code</att>
-        </sourceAttributes -->
-        <addAttributes>
-            <att name="_FillValue" type="float">NaN</att>
-            <att name="ioos_category">Unknown</att>
-            <att name="long_name">Pres Tend Char Pst3hrs</att>
-        </addAttributes>
-    </dataVariable>
-    <dataVariable>
-        <sourceName>pres_tend_char_pst3hrs_qa_summary</sourceName>
-        <destinationName>pres_tend_char_pst3hrs_qa_summary</destinationName>
-        <dataType>int</dataType>
-        <!-- sourceAttributes>
-            <att name="units">unitless</att>
-        </sourceAttributes -->
-        <addAttributes>
-            <att name="_FillValue" type="int">2147483647</att>
-            <att name="colorBarMaximum" type="double">150.0</att>
-            <att name="colorBarMinimum" type="double">0.0</att>
-            <att name="ioos_category">Quality</att>
-            <att name="long_name">Pres Tend Char Pst3hrs Qa Summary</att>
-            <att name="units">null</att>
-        </addAttributes>
-    </dataVariable>
-    <dataVariable>
-        <sourceName>pres_tend_char_pst3hrs_data_flag</sourceName>
-        <destinationName>pres_tend_char_pst3hrs_data_flag</destinationName>
-        <dataType>int</dataType>
-        <!-- sourceAttributes>
-            <att name="units">unitless</att>
-        </sourceAttributes -->
-        <addAttributes>
-            <att name="_FillValue" type="int">2147483647</att>
-            <att name="colorBarMaximum" type="double">150.0</att>
-            <att name="colorBarMinimum" type="double">0.0</att>
-            <att name="ioos_category">Quality</att>
-            <att name="long_name">Pres Tend Char Pst3hrs Data Flag</att>
-            <att name="units">null</att>
-        </addAttributes>
-    </dataVariable>
-    <dataVariable>
         <sourceName>pres_tend_amt_pst3hrs</sourceName>
         <destinationName>pres_tend_amt_pst3hrs</destinationName>
         <dataType>float</dataType>
@@ -1183,6 +1138,51 @@
             <att name="colorBarMinimum" type="double">0.0</att>
             <att name="ioos_category">Quality</att>
             <att name="long_name">Pres Tend Amt Pst3hrs Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_char_pst3hrs</sourceName>
+        <destinationName>pres_tend_char_pst3hrs</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">code</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Pres Tend Char Pst3hrs</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_char_pst3hrs_qa_summary</sourceName>
+        <destinationName>pres_tend_char_pst3hrs_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pres Tend Char Pst3hrs Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_char_pst3hrs_data_flag</sourceName>
+        <destinationName>pres_tend_char_pst3hrs_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pres Tend Char Pst3hrs Data Flag</att>
             <att name="units">null</att>
         </addAttributes>
     </dataVariable>
@@ -1592,6 +1592,7 @@
         </addAttributes>
     </dataVariable>
 </dataset>
+
 
 
 </erddapDatasets>

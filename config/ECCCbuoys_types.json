@@ -1,7 +1,7 @@
 {
     "date_tm": {
         "type": "string",
-        "unit": "yyyy-MM-dd'T'HH:mm:ssZ"
+        "unit": "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
     },
     "lat": {
         "type": "float",

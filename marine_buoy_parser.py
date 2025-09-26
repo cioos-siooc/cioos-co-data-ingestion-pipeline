@@ -84,7 +84,7 @@ class Marine_buoy_parser:
         wmo_synop_id = self.getBuoyId()
         fields =  [] 
         units = []
-        units.append("date_tm,standard_name,time")
+        #units.append("date_tm,standard_name,time")
 
 
 
