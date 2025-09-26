@@ -1,0 +1,1597 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<erddapDatasets>
+    <cacheMinutes></cacheMinutes>                                     <!-- default=60 -->
+    <decompressedCacheMaxGB></decompressedCacheMaxGB>                 <!-- default=10 -->
+    <decompressedCacheMaxMinutesOld></decompressedCacheMaxMinutesOld> <!-- default=15 -->
+    <drawLandMask></drawLandMask>                                     <!-- "over" or "under" (default) -->
+    <emailDiagnosticsToErdData></emailDiagnosticsToErdData>           <!-- true (the default) or false -->
+    <graphBackgroundColor></graphBackgroundColor>                     <!-- 0xAARRGGBB, default is 0xffccccff -->
+    <ipAddressMaxRequests></ipAddressMaxRequests>                     <!-- current default=7 -->
+    <ipAddressMaxRequestsActive></ipAddressMaxRequestsActive>         <!-- current default=2 -->
+    <ipAddressUnlimited></ipAddressUnlimited>                         <!-- default=empty -->
+    <loadDatasetsMinMinutes></loadDatasetsMinMinutes>                 <!-- usually=default=15 -->
+    <loadDatasetsMaxMinutes></loadDatasetsMaxMinutes>                 <!-- default=60 -->
+    <logLevel></logLevel>                                             <!-- "warning" (fewest messages), "info" (default), or "all" (most messages) -->
+    <nGridThreads></nGridThreads>                                     <!-- default=1 if CPU>4cores=3 -->
+    <nTableThreads></nTableThreads>                                   <!-- default=1 if CPU>4cores=3-->
+    <partialRequestMaxBytes></partialRequestMaxBytes>                 <!-- default=490000000 -->
+    <partialRequestMaxCells></partialRequestMaxCells>                 <!-- default=10000000 -->
+    <slowDownTroubleMillis></slowDownTroubleMillis>                   <!-- default=1000 -->
+    <unusualActivity></unusualActivity>                               <!-- default=10000 -->
+    <updateMaxEvents></updateMaxEvents>                               <!-- default=10 -->
+    <!-- The defaults for the following tags are in messages.xml. -->
+    <startHeadHtml5></startHeadHtml5>
+    <startBodyHtml5></startBodyHtml5>                                 <!-- This is often customized. -->
+    <theShortDescriptionHtml></theShortDescriptionHtml>               <!-- This is often customized. -->
+    <endBodyHtml5></endBodyHtml5>
+    <standardLicense></standardLicense>
+    <standardContact></standardContact>
+    <standardDataLicenses></standardDataLicenses>
+    <standardDisclaimerOfEndorsement></standardDisclaimerOfEndorsement>
+    <standardDisclaimerOfExternalLinks></standardDisclaimerOfExternalLinks>
+    <standardGeneralDisclaimer></standardGeneralDisclaimer>
+    <standardPrivacyPolicy></standardPrivacyPolicy>
+    <!-- End of standard text -->
+    <requestBlacklist></requestBlacklist>                              <!--  comma-separated list of numeric IP addresses which will be blacklisted -->
+
+    <dataset type="EDDTableFromNccsvFiles" datasetID="ECCCbuoys_399c_10d0_7d3a" active="true">
+    <reloadEveryNMinutes>1</reloadEveryNMinutes>
+    <updateEveryNMillis>10000</updateEveryNMillis>
+    <fileDir>/datasets/ECCCbuoys/</fileDir>
+    <fileNameRegex>.*</fileNameRegex>
+    <recursive>true</recursive>
+    <pathRegex>.*</pathRegex>
+    <metadataFrom>last</metadataFrom>
+    <standardizeWhat>0</standardizeWhat>
+    <sortFilesBySourceNames></sortFilesBySourceNames>
+    <fileTableInMemory>false</fileTableInMemory>
+    <accessibleViaFiles>true</accessibleViaFiles>
+    <!-- sourceAttributes>
+        <att name="Conventions">..., NCCSV-...</att>
+    </sourceAttributes -->
+    <!-- Please specify the actual cdm_data_type (TimeSeries?) and related info below, for example...
+        <att name="cdm_timeseries_variables">station_id, longitude, latitude</att>
+        <att name="subsetVariables">station_id, longitude, latitude</att>
+    -->
+    <addAttributes>
+        <att name="cdm_data_type">Point</att>
+        <att name="Conventions">..., NCCSV-..., COARDS, CF-1.10, ACDD-1.3</att>
+        <att name="infoUrl">???</att>
+        <att name="institution">???</att>
+        <att name="keywords">air, air_temperature, americal, amt, atmosphere, atmospheric, average, avg_air_temp_pst10mts, avg_air_temp_pst10mts_data_flag, avg_air_temp_pst10mts_qa_summary, avg_batry_volt_pst10mts, avg_batry_volt_pst10mts_data_flag, avg_batry_volt_pst10mts_qa_summary, avg_max_wave_hgt_pst20mts, avg_max_wave_hgt_pst20mts_data_flag, avg_max_wave_hgt_pst20mts_qa_summary, avg_max_wave_pd_pst20mts, avg_max_wave_pd_pst20mts_data_flag, avg_max_wave_pd_pst20mts_qa_summary, avg_mslp_pst10mts, avg_mslp_pst10mts_data_flag, avg_mslp_pst10mts_qa_summary, avg_sea_sfc_temp_pst10mts, avg_sea_sfc_temp_pst10mts_data_flag, avg_sea_sfc_temp_pst10mts_qa_summary, avg_solr_panl_crnt_pst10mts, avg_solr_panl_crnt_pst10mts_data_flag, avg_solr_panl_crnt_pst10mts_qa_summary, avg_stn_pres_pst10mts, avg_stn_pres_pst10mts_1, avg_stn_pres_pst10mts_1_data_flag, avg_stn_pres_pst10mts_1_qa_summary, avg_stn_pres_pst10mts_2, avg_stn_pres_pst10mts_2_data_flag, avg_stn_pres_pst10mts_2_qa_summary, avg_stn_pres_pst10mts_data_flag, avg_stn_pres_pst10mts_qa_summary, avg_wave_hgt_pst20mts, avg_wave_hgt_pst20mts_data_flag, avg_wave_hgt_pst20mts_qa_summary, avg_wave_pd_pst20mts, avg_wave_pd_pst20mts_data_flag, avg_wave_pd_pst20mts_qa_summary, avg_wnd_dir_pst10mts, avg_wnd_dir_pst10mts_1, avg_wnd_dir_pst10mts_1_data_flag, avg_wnd_dir_pst10mts_1_qa_summary, avg_wnd_dir_pst10mts_2, avg_wnd_dir_pst10mts_2_data_flag, avg_wnd_dir_pst10mts_2_qa_summary, avg_wnd_dir_pst10mts_data_flag, avg_wnd_dir_pst10mts_qa_summary, avg_wnd_spd_pst10mts, avg_wnd_spd_pst10mts_1, avg_wnd_spd_pst10mts_1_data_flag, avg_wnd_spd_pst10mts_1_qa_summary, avg_wnd_spd_pst10mts_2, avg_wnd_spd_pst10mts_2_data_flag, avg_wnd_spd_pst10mts_2_qa_summary, avg_wnd_spd_pst10mts_data_flag, avg_wnd_spd_pst10mts_qa_summary, avg_wtr_lvl_snsr_volt_pst10mts, avg_wtr_lvl_snsr_volt_pst10mts_data_flag, avg_wtr_lvl_snsr_volt_pst10mts_qa_summary, batry, buoy, char, crnt, crnt_buoy_lat, crnt_buoy_lat_data_flag, crnt_buoy_lat_qa_summary, crnt_buoy_long, crnt_buoy_long_data_flag, crnt_buoy_long_qa_summary, currents, data, date, dir, disp, earth, Earth Science &gt; Atmosphere &gt; Atmospheric Temperature &gt; Air Temperature, Earth Science &gt; Atmosphere &gt; Atmospheric Temperature &gt; Surface Air Temperature, elev, extnd, flag, hgt, identifier, latitude, local, long, longitude, lvl, max, max_avg_wnd_spd_pst10mts, max_avg_wnd_spd_pst10mts_1, max_avg_wnd_spd_pst10mts_1_data_flag, max_avg_wnd_spd_pst10mts_1_qa_summary, max_avg_wnd_spd_pst10mts_2, max_avg_wnd_spd_pst10mts_2_data_flag, max_avg_wnd_spd_pst10mts_2_qa_summary, max_avg_wnd_spd_pst10mts_data_flag, max_avg_wnd_spd_pst10mts_qa_summary, meteorological, model, msc, msc_id, mslp, nam, north, organisation, panl, pk_wave_hgt_pst20mts, pk_wave_hgt_pst20mts_data_flag, pk_wave_hgt_pst20mts_qa_summary, pk_wave_pd_pst20mts, pk_wave_pd_pst20mts_data_flag, pk_wave_pd_pst20mts_qa_summary, pres, pres_tend_amt_pst3hrs, pres_tend_amt_pst3hrs_data_flag, pres_tend_amt_pst3hrs_qa_summary, pres_tend_char_pst3hrs, pres_tend_char_pst3hrs_data_flag, pres_tend_char_pst3hrs_qa_summary, pressure, pst10mts, pst20mts, pst3hrs, quality, science, sea, sfc, sig, sig_wave_hgt_pst20mts, sig_wave_hgt_pst20mts_data_flag, sig_wave_hgt_pst20mts_qa_summary, sig_wave_pd_pst20mts, sig_wave_pd_pst20mts_data_flag, sig_wave_pd_pst20mts_qa_summary, snsr, solr, source, spd, stn, stn_elev, stn_nam, stn_typ, summary, surface, surface waves, synop, temperature, tend, time, typ, vert, volt, wave, waves, wmo, wmo_id_extnd, wmo_synop_id, wnd, wnd_snsr_vert_disp, wnd_snsr_vert_disp_data_flag, wnd_snsr_vert_disp_qa_summary, world, wtr</att>
+        <att name="keywords_vocabulary">GCMD Science Keywords</att>
+        <att name="license">[standard]</att>
+        <att name="sourceUrl">(local files)</att>
+        <att name="standard_name_vocabulary">CF Standard Name Table v70</att>
+        <att name="subsetVariables">latitude, longitude, stn_typ, wmo_synop_id, wmo_id_extnd, stn_nam, msc_id, stn_elev, crnt_buoy_lat_data_flag, crnt_buoy_long_data_flag, avg_air_temp_pst10mts_data_flag, avg_sea_sfc_temp_pst10mts_data_flag, avg_batry_volt_pst10mts_qa_summary, avg_batry_volt_pst10mts_data_flag, avg_solr_panl_crnt_pst10mts_data_flag, avg_wtr_lvl_snsr_volt_pst10mts, avg_wtr_lvl_snsr_volt_pst10mts_qa_summary, avg_wtr_lvl_snsr_volt_pst10mts_data_flag, avg_wave_hgt_pst20mts_data_flag, pk_wave_hgt_pst20mts_data_flag, sig_wave_pd_pst20mts_data_flag, sig_wave_hgt_pst20mts_data_flag, avg_max_wave_hgt_pst20mts_data_flag, avg_max_wave_pd_pst20mts_data_flag, avg_wave_pd_pst20mts_data_flag, pk_wave_pd_pst20mts_data_flag, avg_stn_pres_pst10mts_data_flag, avg_wnd_spd_pst10mts_data_flag, avg_wnd_dir_pst10mts_data_flag, max_avg_wnd_spd_pst10mts_data_flag, wnd_snsr_vert_disp, wnd_snsr_vert_disp_qa_summary, wnd_snsr_vert_disp_data_flag, pres_tend_char_pst3hrs_qa_summary, pres_tend_amt_pst3hrs_qa_summary, avg_mslp_pst10mts_qa_summary, avg_stn_pres_pst10mts_1_qa_summary, avg_stn_pres_pst10mts_1_data_flag, avg_stn_pres_pst10mts_2_qa_summary, avg_stn_pres_pst10mts_2_data_flag, avg_wnd_spd_pst10mts_1_qa_summary, avg_wnd_spd_pst10mts_1_data_flag, avg_wnd_spd_pst10mts_2_qa_summary, avg_wnd_spd_pst10mts_2_data_flag, avg_wnd_dir_pst10mts_1_qa_summary, avg_wnd_dir_pst10mts_1_data_flag, avg_wnd_dir_pst10mts_2_qa_summary, avg_wnd_dir_pst10mts_2_data_flag, max_avg_wnd_spd_pst10mts_1_qa_summary, max_avg_wnd_spd_pst10mts_1_data_flag, max_avg_wnd_spd_pst10mts_2_qa_summary, max_avg_wnd_spd_pst10mts_2_data_flag</att>
+        <att name="summary">Data from a local source.</att>
+        <att name="testOutOfDate">now-30days</att>
+        <att name="title">Data from a local source.</att>
+    </addAttributes>
+    <dataVariable>
+        <sourceName>date_tm</sourceName>
+        <destinationName>time</destinationName>
+        <dataType>String</dataType>
+        <!-- sourceAttributes>
+            <att name="standard_name">time</att>
+            <att name="units">yyyy-MM-dd&#39;T&#39;HH:mm:ssZ</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="ioos_category">Time</att>
+            <att name="long_name">Date Tm</att>
+            <att name="source_name">date_tm</att>
+            <att name="time_precision">1970-01-01T00:00:00Z</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>lat</sourceName>
+        <destinationName>latitude</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">degrees_north</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="colorBarMaximum" type="double">90.0</att>
+            <att name="colorBarMinimum" type="double">-90.0</att>
+            <att name="ioos_category">Location</att>
+            <att name="long_name">Latitude</att>
+            <att name="standard_name">latitude</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>long</sourceName>
+        <destinationName>longitude</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">degrees_east</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="colorBarMaximum" type="double">180.0</att>
+            <att name="colorBarMinimum" type="double">-180.0</att>
+            <att name="ioos_category">Location</att>
+            <att name="long_name">Longitude</att>
+            <att name="source_name">long</att>
+            <att name="standard_name">longitude</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>stn_typ</sourceName>
+        <destinationName>stn_typ</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">code</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">STN TYP</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>wmo_synop_id</sourceName>
+        <destinationName>wmo_synop_id</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="ioos_category">Identifier</att>
+            <att name="long_name">Wmo Synop Id</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>wmo_id_extnd</sourceName>
+        <destinationName>wmo_id_extnd</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="ioos_category">Identifier</att>
+            <att name="long_name">Wmo Id Extnd</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>stn_nam</sourceName>
+        <destinationName>stn_nam</destinationName>
+        <dataType>String</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Stn Nam</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>msc_id</sourceName>
+        <destinationName>msc_id</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="ioos_category">Identifier</att>
+            <att name="long_name">Msc Id</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>stn_elev</sourceName>
+        <destinationName>stn_elev</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">m</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Stn Elev</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>crnt_buoy_lat</sourceName>
+        <destinationName>crnt_buoy_lat</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Location</att>
+            <att name="long_name">Crnt Buoy Lat</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>crnt_buoy_lat_qa_summary</sourceName>
+        <destinationName>crnt_buoy_lat_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Crnt Buoy Lat Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>crnt_buoy_lat_data_flag</sourceName>
+        <destinationName>crnt_buoy_lat_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Crnt Buoy Lat Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>crnt_buoy_long</sourceName>
+        <destinationName>crnt_buoy_long</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Crnt Buoy Long</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>crnt_buoy_long_qa_summary</sourceName>
+        <destinationName>crnt_buoy_long_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Crnt Buoy Long Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>crnt_buoy_long_data_flag</sourceName>
+        <destinationName>crnt_buoy_long_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Crnt Buoy Long Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_air_temp_pst10mts</sourceName>
+        <destinationName>avg_air_temp_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°C</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="colorBarMaximum" type="double">40.0</att>
+            <att name="colorBarMinimum" type="double">-10.0</att>
+            <att name="ioos_category">Temperature</att>
+            <att name="long_name">Air Temperature</att>
+            <att name="standard_name">air_temperature</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_air_temp_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_air_temp_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Air Temp Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_air_temp_pst10mts_data_flag</sourceName>
+        <destinationName>avg_air_temp_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Air Temp Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_sea_sfc_temp_pst10mts</sourceName>
+        <destinationName>avg_sea_sfc_temp_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°C</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="colorBarMaximum" type="double">40.0</att>
+            <att name="colorBarMinimum" type="double">-10.0</att>
+            <att name="ioos_category">Temperature</att>
+            <att name="long_name">Avg Sea Sfc Temp Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_sea_sfc_temp_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_sea_sfc_temp_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Sea Sfc Temp Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_sea_sfc_temp_pst10mts_data_flag</sourceName>
+        <destinationName>avg_sea_sfc_temp_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Sea Sfc Temp Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_batry_volt_pst10mts</sourceName>
+        <destinationName>avg_batry_volt_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">V</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Avg Batry Volt Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_batry_volt_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_batry_volt_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Batry Volt Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_batry_volt_pst10mts_data_flag</sourceName>
+        <destinationName>avg_batry_volt_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Batry Volt Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_solr_panl_crnt_pst10mts</sourceName>
+        <destinationName>avg_solr_panl_crnt_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">A</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Avg Solr Panl Crnt Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_solr_panl_crnt_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_solr_panl_crnt_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Solr Panl Crnt Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_solr_panl_crnt_pst10mts_data_flag</sourceName>
+        <destinationName>avg_solr_panl_crnt_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Solr Panl Crnt Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wtr_lvl_snsr_volt_pst10mts</sourceName>
+        <destinationName>avg_wtr_lvl_snsr_volt_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">V</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Avg Wtr Lvl Snsr Volt Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wtr_lvl_snsr_volt_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_wtr_lvl_snsr_volt_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wtr Lvl Snsr Volt Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wtr_lvl_snsr_volt_pst10mts_data_flag</sourceName>
+        <destinationName>avg_wtr_lvl_snsr_volt_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wtr Lvl Snsr Volt Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wave_hgt_pst20mts</sourceName>
+        <destinationName>avg_wave_hgt_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">m</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Avg Wave Hgt Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wave_hgt_pst20mts_qa_summary</sourceName>
+        <destinationName>avg_wave_hgt_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wave Hgt Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wave_hgt_pst20mts_data_flag</sourceName>
+        <destinationName>avg_wave_hgt_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wave Hgt Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pk_wave_hgt_pst20mts</sourceName>
+        <destinationName>pk_wave_hgt_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">m</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Pk Wave Hgt Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pk_wave_hgt_pst20mts_qa_summary</sourceName>
+        <destinationName>pk_wave_hgt_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pk Wave Hgt Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pk_wave_hgt_pst20mts_data_flag</sourceName>
+        <destinationName>pk_wave_hgt_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pk Wave Hgt Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>sig_wave_pd_pst20mts</sourceName>
+        <destinationName>sig_wave_pd_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">s</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Sig Wave Pd Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>sig_wave_pd_pst20mts_qa_summary</sourceName>
+        <destinationName>sig_wave_pd_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Sig Wave Pd Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>sig_wave_pd_pst20mts_data_flag</sourceName>
+        <destinationName>sig_wave_pd_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Sig Wave Pd Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>sig_wave_hgt_pst20mts</sourceName>
+        <destinationName>sig_wave_hgt_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">m</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Sig Wave Hgt Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>sig_wave_hgt_pst20mts_qa_summary</sourceName>
+        <destinationName>sig_wave_hgt_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Sig Wave Hgt Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>sig_wave_hgt_pst20mts_data_flag</sourceName>
+        <destinationName>sig_wave_hgt_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Sig Wave Hgt Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_max_wave_hgt_pst20mts</sourceName>
+        <destinationName>avg_max_wave_hgt_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">m</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Avg Max Wave Hgt Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_max_wave_hgt_pst20mts_qa_summary</sourceName>
+        <destinationName>avg_max_wave_hgt_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Max Wave Hgt Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_max_wave_hgt_pst20mts_data_flag</sourceName>
+        <destinationName>avg_max_wave_hgt_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Max Wave Hgt Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_max_wave_pd_pst20mts</sourceName>
+        <destinationName>avg_max_wave_pd_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">s</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Avg Max Wave Pd Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_max_wave_pd_pst20mts_qa_summary</sourceName>
+        <destinationName>avg_max_wave_pd_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Max Wave Pd Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_max_wave_pd_pst20mts_data_flag</sourceName>
+        <destinationName>avg_max_wave_pd_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Max Wave Pd Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wave_pd_pst20mts</sourceName>
+        <destinationName>avg_wave_pd_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">s</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Avg Wave Pd Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wave_pd_pst20mts_qa_summary</sourceName>
+        <destinationName>avg_wave_pd_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wave Pd Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wave_pd_pst20mts_data_flag</sourceName>
+        <destinationName>avg_wave_pd_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wave Pd Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pk_wave_pd_pst20mts</sourceName>
+        <destinationName>pk_wave_pd_pst20mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">s</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Surface Waves</att>
+            <att name="long_name">Pk Wave Pd Pst20mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pk_wave_pd_pst20mts_qa_summary</sourceName>
+        <destinationName>pk_wave_pd_pst20mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pk Wave Pd Pst20mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pk_wave_pd_pst20mts_data_flag</sourceName>
+        <destinationName>pk_wave_pd_pst20mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pk Wave Pd Pst20mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts</sourceName>
+        <destinationName>avg_stn_pres_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">hPa</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Pressure</att>
+            <att name="long_name">Avg Stn Pres Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Stn Pres Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_data_flag</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Stn Pres Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">km/h</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Currents</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_data_flag</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_data_flag</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">km/h</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Currents</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_qa_summary</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_data_flag</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>wnd_snsr_vert_disp</sourceName>
+        <destinationName>wnd_snsr_vert_disp</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">m</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Wnd Snsr Vert Disp</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>wnd_snsr_vert_disp_qa_summary</sourceName>
+        <destinationName>wnd_snsr_vert_disp_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Wnd Snsr Vert Disp Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>wnd_snsr_vert_disp_data_flag</sourceName>
+        <destinationName>wnd_snsr_vert_disp_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Wnd Snsr Vert Disp Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_char_pst3hrs</sourceName>
+        <destinationName>pres_tend_char_pst3hrs</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">code</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Pres Tend Char Pst3hrs</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_char_pst3hrs_qa_summary</sourceName>
+        <destinationName>pres_tend_char_pst3hrs_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pres Tend Char Pst3hrs Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_char_pst3hrs_data_flag</sourceName>
+        <destinationName>pres_tend_char_pst3hrs_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pres Tend Char Pst3hrs Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_amt_pst3hrs</sourceName>
+        <destinationName>pres_tend_amt_pst3hrs</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">hPa</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Pressure</att>
+            <att name="long_name">Pres Tend Amt Pst3hrs</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_amt_pst3hrs_qa_summary</sourceName>
+        <destinationName>pres_tend_amt_pst3hrs_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pres Tend Amt Pst3hrs Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>pres_tend_amt_pst3hrs_data_flag</sourceName>
+        <destinationName>pres_tend_amt_pst3hrs_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Pres Tend Amt Pst3hrs Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_mslp_pst10mts</sourceName>
+        <destinationName>avg_mslp_pst10mts</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">hPa</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Pressure</att>
+            <att name="long_name">Avg Mslp Pst10mts</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_mslp_pst10mts_qa_summary</sourceName>
+        <destinationName>avg_mslp_pst10mts_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Mslp Pst10mts Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_mslp_pst10mts_data_flag</sourceName>
+        <destinationName>avg_mslp_pst10mts_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Mslp Pst10mts Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_1</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_1</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">hPa</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Pressure</att>
+            <att name="long_name">Avg Stn Pres Pst10mts 1</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_1_qa_summary</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_1_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Stn Pres Pst10mts 1 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_1_data_flag</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_1_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Stn Pres Pst10mts 1 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_2</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_2</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">hPa</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Pressure</att>
+            <att name="long_name">Avg Stn Pres Pst10mts 2</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_2_qa_summary</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_2_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Stn Pres Pst10mts 2 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_stn_pres_pst10mts_2_data_flag</sourceName>
+        <destinationName>avg_stn_pres_pst10mts_2_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Stn Pres Pst10mts 2 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_1</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_1</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">km/h</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Currents</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts 1</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_1_qa_summary</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_1_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts 1 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_1_data_flag</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_1_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts 1 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_2</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_2</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">km/h</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Currents</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts 2</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_2_qa_summary</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_2_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts 2 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_spd_pst10mts_2_data_flag</sourceName>
+        <destinationName>avg_wnd_spd_pst10mts_2_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Spd Pst10mts 2 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_1</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_1</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts 1</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_1_qa_summary</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_1_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts 1 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_1_data_flag</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_1_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts 1 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_2</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_2</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">°</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Unknown</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts 2</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_2_qa_summary</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_2_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts 2 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>avg_wnd_dir_pst10mts_2_data_flag</sourceName>
+        <destinationName>avg_wnd_dir_pst10mts_2_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Avg Wnd Dir Pst10mts 2 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_1</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_1</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">km/h</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Currents</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts 1</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_1_qa_summary</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_1_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts 1 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_1_data_flag</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_1_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts 1 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_2</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_2</destinationName>
+        <dataType>float</dataType>
+        <!-- sourceAttributes>
+            <att name="units">km/h</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="float">NaN</att>
+            <att name="ioos_category">Currents</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts 2</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_2_qa_summary</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_2_qa_summary</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts 2 Qa Summary</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+    <dataVariable>
+        <sourceName>max_avg_wnd_spd_pst10mts_2_data_flag</sourceName>
+        <destinationName>max_avg_wnd_spd_pst10mts_2_data_flag</destinationName>
+        <dataType>int</dataType>
+        <!-- sourceAttributes>
+            <att name="units">unitless</att>
+        </sourceAttributes -->
+        <addAttributes>
+            <att name="_FillValue" type="int">2147483647</att>
+            <att name="colorBarMaximum" type="double">150.0</att>
+            <att name="colorBarMinimum" type="double">0.0</att>
+            <att name="ioos_category">Quality</att>
+            <att name="long_name">Max Avg Wnd Spd Pst10mts 2 Data Flag</att>
+            <att name="units">null</att>
+        </addAttributes>
+    </dataVariable>
+</dataset>
+
+
+</erddapDatasets>

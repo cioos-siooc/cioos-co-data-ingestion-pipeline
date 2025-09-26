@@ -1,6 +1,16 @@
-corrected_amqp.log
+*.log
+*.log.previous
 *.xml
 *.csv
 *.json
+*.txt
+*.txt.previous
+*.nc
+*.out
+*.out.previous
+*.cdl
 __pycache__/
+!ECCCbuoys_types.json
+!datasets.xml
+!setup.xml
 

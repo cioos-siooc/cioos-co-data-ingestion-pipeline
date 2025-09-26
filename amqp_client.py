@@ -19,7 +19,7 @@ logging.basicConfig(
     level=logging.INFO,  # Normal logging level
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
-        logging.FileHandler('corrected_amqp.log'),
+        logging.FileHandler('amqp.log'),
         logging.StreamHandler()
     ]
 )
@@ -30,13 +30,13 @@ class SarraceniaStyleAMQP:
         self.connection = None
         self.channel = None
         self.parser = Marine_buoy_parser()
-        self.download_dir = Path("data/marine_buoys")
+        self.download_dir = Path("data/marine_buoys/xml")
         self.download_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate persistent Sarracenia-style queue name
         hostname = socket.gethostname()
         # Use 'main' as consistent ID to avoid creating new queues on each restart
-        unique_id = "main"
+        unique_id = "dev2"
         self.queue_name = f"q_anonymous.subscribe.marine_buoys.{hostname}_{unique_id}"
         
     def connect(self):
@@ -56,11 +56,7 @@ class SarraceniaStyleAMQP:
                 credentials=credentials,
                 ssl_options=pika.SSLOptions(ssl_context),
                 heartbeat=600,
-                blocked_connection_timeout=300,
-                client_properties={
-                    'product': 'MetPX Sarracenia Clone',
-                    'product_version': '1.0'
-                }
+                blocked_connection_timeout=300
             )
             
             self.connection = pika.BlockingConnection(parameters)
@@ -145,7 +141,6 @@ class SarraceniaStyleAMQP:
             body_str = body.decode('utf-8').strip()
             
             # Parse Sarracenia v02 format: timestamp base_url rel_path
-            # Example: "20250909160307.29 https://dd2.weather.gc.ca/ 20250909/WXO-DD/observations/swob-ml/marine/moored-buoys/20250909/4600303/2025-09-09-1600-4600303-AUTO-swob.xml"
             parts = body_str.split(' ', 2)  # Split into max 3 parts
             
             if len(parts) < 3:
