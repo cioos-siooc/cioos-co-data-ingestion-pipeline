@@ -19,7 +19,7 @@ logging.basicConfig(
     level=logging.INFO,  # Normal logging level
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
-        logging.FileHandler('amqp.log'),
+        logging.FileHandler('../logs/eccc_buoys.log'),
         logging.StreamHandler()
     ]
 )

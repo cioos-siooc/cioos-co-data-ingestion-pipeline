@@ -1,4 +1,28 @@
 services:
+  prefect:
+    image: prefecthq/prefect:3-latest
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - "4200:4200"  # Prefect UI
+      - "4201:4201"  # Prefect API
+    environment:
+      PREFECT_UI_URL: http://localhost:4200
+      
+  eccc_buoy_parser:
+    build:
+      context: ./ECCC_Buoy_Parser
+      dockerfile: Dockerfile
+    #profiles:
+    #  - tools
+    #volumes:
+    	
+    #  - ./harvest_config.yaml:/app/harvester/harvest_config.yaml
+    #  - ./harvester_cache:/app/harvester/harvester_cache
+    #  - ./harvest:/app/harvester/harvest
+    #env_file:
+    #  - .env
+
+   
   erddap:
     image: axiom/docker-erddap:2.23-jdk17-openjdk
     restart: unless-stopped

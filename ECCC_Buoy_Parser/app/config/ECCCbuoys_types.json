@@ -1,0 +1,178 @@
+{
+    "date_tm": {
+        "type": "float",
+        "unit": "datetime"
+    },
+    "lat": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "long": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "stn_typ": {
+        "type": "float",
+        "unit": "code"
+    },
+    "wmo_synop_id": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "wmo_id_extnd": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "stn_nam": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "msc_id": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "stn_elev": {
+        "type": "float",
+        "unit": "m"
+    },
+    "crnt_buoy_lat": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "crnt_buoy_long": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "avg_air_temp_pst10mts": {
+        "type": "float",
+        "unit": "\u00b0C"
+    },
+    "avg_sea_sfc_temp_pst10mts": {
+        "type": "float",
+        "unit": "\u00b0C"
+    },
+    "avg_batry_volt_pst10mts": {
+        "type": "float",
+        "unit": "V"
+    },
+    "avg_solr_panl_crnt_pst10mts": {
+        "type": "float",
+        "unit": "A"
+    },
+    "avg_wtr_lvl_snsr_volt_pst10mts": {
+        "type": "float",
+        "unit": "V"
+    },
+    "avg_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "pk_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "sig_wave_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "sig_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "avg_max_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "avg_max_wave_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "avg_wave_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "pk_wave_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "avg_stn_pres_pst10mts": {
+        "type": "float",
+        "unit": "hPa"
+    },
+    "avg_wnd_spd_pst10mts": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "avg_wnd_dir_pst10mts": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "max_avg_wnd_spd_pst10mts": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "wnd_snsr_vert_disp": {
+        "type": "float",
+        "unit": "m"
+    },
+    "pres_tend_char_pst3hrs": {
+        "type": "float",
+        "unit": "code"
+    },
+    "pres_tend_amt_pst3hrs": {
+        "type": "float",
+        "unit": "hPa"
+    },
+    "avg_mslp_pst10mts": {
+        "type": "float",
+        "unit": "hPa"
+    },
+    "avg_stn_pres_pst10mts_1": {
+        "type": "float",
+        "unit": "hPa"
+    },
+    "avg_stn_pres_pst10mts_2": {
+        "type": "float",
+        "unit": "hPa"
+    },
+    "avg_wnd_spd_pst10mts_1": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "avg_wnd_spd_pst10mts_2": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "avg_wnd_dir_pst10mts_1": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "avg_wnd_dir_pst10mts_2": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "max_avg_wnd_spd_pst10mts_1": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "max_avg_wnd_spd_pst10mts_2": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "pk_wave_pd_pst35mts_10mts_ago": {
+        "type": "float",
+        "unit": "s"
+    },
+    "sig_wave_hgt_pst35mts_10mts_ago": {
+        "type": "float",
+        "unit": "m"
+    },
+    "pk_wave_hgt_pst35mts_10mts_ago": {
+        "type": "float",
+        "unit": "m"
+    },
+    "batry_volt": {
+        "type": "float",
+        "unit": "V"
+    }
+}
