@@ -12,6 +12,13 @@ services:
     build:
       context: ./ECCC_Buoy_Parser
       dockerfile: Dockerfile
+    volumes:
+      - ./datasets:/app/datasets
+      - ./ECCC_Buoy_Parser/app/config:/app/config
+      - ./ECCC_Buoy_Parser/app/data:/app/data
+    environment:
+      - PREFECT_API_URL=http://0.0.0.0:4200/api
+    
     #profiles:
     #  - tools
     #volumes:
@@ -24,7 +31,7 @@ services:
 
    
   erddap:
-    image: axiom/docker-erddap:2.23-jdk17-openjdk
+    image: axiom/docker-erddap:v2.28.1
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -32,6 +39,7 @@ services:
       - ./erddap/conf/robots.txt:/usr/local/tomcat/webapps/ROOT/robots.txt
       - ./erddap/content:/usr/local/tomcat/content/erddap
       - ./erddap/data:/erddapData
+      - ./erddap/datasets.d:/datasets.d
       - ./datasets:/datasets
       - ./scripts:/scripts
     environment:

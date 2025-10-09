@@ -1,15 +1,18 @@
 {
     "date_tm": {
-        "type": "float",
-        "unit": "datetime"
+        "type": "string",
+        "unit": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "rename":"time"
     },
     "lat": {
         "type": "float",
-        "unit": "\u00b0"
+        "unit": "\u00b0",
+        "rename":"latitude"
     },
     "long": {
         "type": "float",
-        "unit": "\u00b0"
+        "unit": "\u00b0",
+        "rename":"longitude"
     },
     "stn_typ": {
         "type": "float",
@@ -24,7 +27,7 @@
         "unit": "unitless"
     },
     "stn_nam": {
-        "type": "float",
+        "type": "string",
         "unit": "unitless"
     },
     "msc_id": {
@@ -34,6 +37,14 @@
     "stn_elev": {
         "type": "float",
         "unit": "m"
+    },    
+    "stn_typ": {
+        "type": "int",
+        "unit": "unitless"
+    },
+    "rpt_typ": {
+        "type": "int",
+        "unit": "unitless"
     },
     "crnt_buoy_lat": {
         "type": "float",
@@ -115,13 +126,13 @@
         "type": "float",
         "unit": "m"
     },
-    "pres_tend_char_pst3hrs": {
-        "type": "float",
-        "unit": "code"
-    },
     "pres_tend_amt_pst3hrs": {
         "type": "float",
         "unit": "hPa"
+    },
+    "pres_tend_char_pst3hrs": {
+        "type": "float",
+        "unit": "code"
     },
     "avg_mslp_pst10mts": {
         "type": "float",
@@ -156,6 +167,90 @@
         "unit": "km/h"
     },
     "max_avg_wnd_spd_pst10mts_2": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "avg_cmpss_hdng_pst10mts_1": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "avg_cmpss_hdng_pst10mts_2": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "avg_obstrn_lamp_crnt_pst10mts": {
+        "type": "float",
+        "unit": "A"
+    },
+    "wtchmn_boot_cnt_pst1hr": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "bad_wnd_smpls_1": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "bad_wnd_smpls_2": {
+        "type": "float",
+        "unit": "unitless"
+    },
+    "max_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "pd_of_max_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "max_wave_crst_hgt_abv_avg_wtr_lvl_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "avg_sig_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "avg_sig_wave_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "avg_spetrl_wave_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "avg_pk_wave_dir_pst20mts": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "pk_wave_dir_sprd_pst20mts": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "spetrl_sig_wave_hgt_pst20mts": {
+        "type": "float",
+        "unit": "m"
+    },
+    "spetrl_wave_enrgy_pd_pst20mts": {
+        "type": "float",
+        "unit": "s"
+    },
+    "avg_wave_dir_pst20mts": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "avg_wave_dir_sprd_pst20mts": {
+        "type": "float",
+        "unit": "\u00b0"
+    },
+    "max_wnd_spd_pst10mts": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "max_wnd_spd_pst10mts_1": {
+        "type": "float",
+        "unit": "km/h"
+    },
+    "max_wnd_spd_pst10mts_2": {
         "type": "float",
         "unit": "km/h"
     },
