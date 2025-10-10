@@ -11,7 +11,6 @@
 *.cdl
 __pycache__/
 !ECCCbuoys_types.json
-!datasets.xml
 !setup.xml
 !robots.txt
 *.bak
