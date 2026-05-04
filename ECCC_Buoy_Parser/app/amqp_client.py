@@ -7,14 +7,25 @@ Based on analysis of Sarracenia source code
 import pika
 import json
 import ssl
-import logging
+#import logging
 import requests
 import socket
 import uuid
 from pathlib import Path
 from marine_buoy_parser import Marine_buoy_parser
+from prefect.logging import get_run_logger
+from prefect import flow, task
+from prefect.cache_policies import NO_CACHE
+from datetime import datetime
+
+def generate_consumer_flow_name():
+    """Generate a descriptive name for the consumer flow run"""
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    hostname = socket.gethostname()
+    return f"consumer-{hostname}-{timestamp}"
 
 # Set up logging
+"""
 logging.basicConfig(
     level=logging.INFO,  # Normal logging level
     format='%(asctime)s [%(levelname)s] %(message)s',
@@ -24,7 +35,7 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-
+"""
 class SarraceniaStyleAMQP:
     def __init__(self):
         self.connection = None
@@ -38,8 +49,9 @@ class SarraceniaStyleAMQP:
         # Use 'main' as consistent ID to avoid creating new queues on each restart
         unique_id = "dev2"
         self.queue_name = f"q_anonymous.subscribe.marine_buoys.{hostname}_{unique_id}"
-        
+    @task(name="establish-amqp-connection", cache_policy=NO_CACHE)
     def connect(self):
+        logger = get_run_logger()
         """Connect using Sarracenia-style parameters"""
         try:
             credentials = pika.PlainCredentials('anonymous', 'anonymous')
@@ -68,8 +80,9 @@ class SarraceniaStyleAMQP:
         except Exception as e:
             logger.error(f"❌ Connection failed: {e}")
             return False
-    
+    @task(name="setup-marine-buoy-queue", cache_policy=NO_CACHE)
     def setup_queue(self):
+        logger = get_run_logger()
         """Set up queue using Sarracenia pattern"""
         try:
             # Declare queue with Sarracenia-style name
@@ -100,8 +113,9 @@ class SarraceniaStyleAMQP:
         except Exception as e:
             logger.error(f"❌ Queue setup failed: {e}")
             return False
-    
+    @task(name="download-buoy-file", task_run_name="download-{filename}", cache_policy=NO_CACHE)
     def download_file(self, url, filename):
+        logger = get_run_logger()
         """Download file from URL"""
         try:
             local_path = self.download_dir / filename
@@ -122,8 +136,9 @@ class SarraceniaStyleAMQP:
         except Exception as e:
             logger.error(f"❌ Download error {filename}: {e}")
             return None
-    
+    @task(name="parse-marine-xml", task_run_name="parse-{file_path.name}", cache_policy=NO_CACHE)
     def parse_file(self, file_path):
+        logger = get_run_logger()
         """Parse downloaded XML file"""
         try:
             result = self.parser.parse_marine_xml(file_path)
@@ -133,9 +148,31 @@ class SarraceniaStyleAMQP:
                 
         except Exception as e:
             logger.error(f"❌ Parse error {file_path}: {e}")
-    
+    @flow(name="process-marine-message", flow_run_name="process-{filename}")
+    def process_message_flow(self, file_url: str, filename: str, timestamp: str):
+        """Subflow to process a single marine buoy message"""
+        logger = get_run_logger()
+        logger.info(f"📨 Processing message: {filename} (timestamp: {timestamp})")
+        
+        try:
+            # Download the file
+            local_path = self.download_file(file_url, filename)
+            if local_path and local_path.suffix.lower() == '.xml':
+                # Parse the file
+                self.parse_file(local_path)
+                logger.info(f"✅ Successfully processed: {filename}")
+                return True
+            else:
+                logger.warning(f"⚠️ Skipping non-XML file: {filename}")
+                return False
+        except Exception as e:
+            logger.error(f"❌ Failed to process {filename}: {e}")
+            return False
+
+    @task(name="process-amqp-message", cache_policy=NO_CACHE)
     def message_callback(self, channel, method, properties, body):
-        """Process incoming messages"""
+        logger = get_run_logger()
+        """Process incoming messages using subflows"""
         try:
             # Decode message body
             body_str = body.decode('utf-8').strip()
@@ -164,22 +201,28 @@ class SarraceniaStyleAMQP:
             
             filename = Path(rel_path).name
             
-            logger.info(f"📨 Processing: {filename} (timestamp: {timestamp})")
+            # Process message using subflow
+            try:
+                # Run the subflow asynchronously
+                flow_run = self.process_message_flow(
+                    file_url=file_url,
+                    filename=filename, 
+                    timestamp=timestamp
+                )
+                logger.info(f"🚀 Started processing subflow for: {filename}")
+            except Exception as e:
+                logger.error(f"❌ Failed to start subflow for {filename}: {e}")
             
-            # Download and parse
-            local_path = self.download_file(file_url, filename)
-            if local_path and local_path.suffix.lower() == '.xml':
-                self.parse_file(local_path)
-            
-            # Acknowledge message
+            # Acknowledge message regardless of processing outcome
             channel.basic_ack(delivery_tag=method.delivery_tag)
             
         except Exception as e:
             logger.error(f"❌ Message processing error: {e}")
             logger.error(f"Message content: {body.decode('utf-8', errors='ignore')[:200]}")
             channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-    
+    @task(name="start-message-consumer", cache_policy=NO_CACHE)
     def start_consuming(self):
+        logger = get_run_logger()
         """Start consuming messages"""
         try:
             # Set QoS similar to Sarracenia
@@ -206,8 +249,9 @@ class SarraceniaStyleAMQP:
             if self.connection and not self.connection.is_closed:
                 self.connection.close()
                 logger.info("🔌 Connection closed")
-    
+    @flow(name="marine-buoy-consumer", flow_run_name=generate_consumer_flow_name)
     def run(self):
+        logger = get_run_logger()
         """Main run method"""
         logger.info("🌊 Starting Sarracenia-Style AMQP Client...")
         

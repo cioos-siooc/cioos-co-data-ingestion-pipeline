@@ -3,11 +3,21 @@ services:
     image: prefecthq/prefect:3-latest
     command: prefect server start --host 0.0.0.0
     ports:
-      - "4200:4200"  # Prefect UI
-      - "4201:4201"  # Prefect API
+      - "4200:4200"  # Prefect UI + API
     environment:
+      PREFECT_API_URL: http://127.0.0.1:4200/api
       PREFECT_UI_URL: http://localhost:4200
-      
+      PREFECT_HOME: /root/.prefect
+    volumes:
+      - prefect_data:/root/.prefect
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:4200/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+    
   eccc_buoy_parser:
     build:
       context: ./ECCC_Buoy_Parser
@@ -17,19 +27,12 @@ services:
       - ./ECCC_Buoy_Parser/app/config:/app/config
       - ./ECCC_Buoy_Parser/app/data:/app/data
     environment:
-      - PREFECT_API_URL=http://0.0.0.0:4200/api
-    
-    #profiles:
-    #  - tools
-    #volumes:
-    	
-    #  - ./harvest_config.yaml:/app/harvester/harvest_config.yaml
-    #  - ./harvester_cache:/app/harvester/harvester_cache
-    #  - ./harvest:/app/harvester/harvest
-    #env_file:
-    #  - .env
+      - PREFECT_API_URL=http://prefect:4200/api
+    depends_on:
+      prefect:
+        condition: service_healthy
+    restart: unless-stopped
 
-   
   erddap:
     image: axiom/docker-erddap:v2.28.1
     restart: unless-stopped
@@ -43,7 +46,6 @@ services:
       - ./datasets:/datasets
       - ./scripts:/scripts
     environment:
-      #note: these can also be set in /usr/local/tomcat/bin/config.sh
       ERDDAP_MIN_MEMORY: 1G
       ERDDAP_MAX_MEMORY: 2G
       ERDDAP_bigParentDirectory: /erddapData/
@@ -51,13 +53,6 @@ services:
       ERDDAP_baseHttpsUrl: https://localhost:8080
       ERDDAP_flagKeyKey: changed
       ERDDAP_emailEverythingTo: this+goes+nowhere@doesnotexist.ioos.us
-      ERDDAP_emailDailyReportTo:
-      ERDDAP_emailFromAddress:
-      ERDDAP_emailUserName:
-      ERDDAP_emailPassword:
-      ERDDAP_emailProperties:
-      ERDDAP_emailSmtpHost:
-      ERDDAP_emailSmtpPort:
       ERDDAP_adminInstitution: Integrated Ocean Observing System (IOOS)
       ERDDAP_adminInstitutionUrl: https://ioos.github.io/
       ERDDAP_adminIndividualName: IOOS Data Manager
@@ -68,4 +63,8 @@ services:
       ERDDAP_adminStateOrProvince: MD
       ERDDAP_adminPostalCode: "20910"
       ERDDAP_adminCountry: USA
-      ERDDAP_adminEmail: data.ioos@noaa.gov
+      ERDDAP_adminEmail: data.ioos@noaa.gov  
+
+volumes:
+  prefect_data:
+
