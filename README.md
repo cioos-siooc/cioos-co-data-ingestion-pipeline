@@ -8,18 +8,24 @@ ERDDAP-compatible NCCSV, and serves them through the **CIOOS National ERDDAP**
 
 ## Architecture
 
-The stack is four Docker services orchestrated by `docker-compose.yml`:
+The stack is four Docker services. Three are defined in this repo's
+`docker-compose.yml`; the `erddap` service is **not redefined here** — it is
+pulled in from the submodule's own compose via Compose `include:`
+(`cioos-national-erddap/docker-compose.yml`), so its definition stays
+single-source-of-truth in the national repo.
 
-| Service | Image | Purpose | Port |
-| --- | --- | --- | --- |
-| `prefect` | `prefecthq/prefect:3-latest` | Prefect 3 server (UI + API). The parser registers its flows/tasks here. | `4200` |
-| `eccc_buoy_parser` | built from `./ECCC_Buoy_Parser/Dockerfile` | Long-running AMQP consumer + parser (`app/amqp_client.py`). | — |
-| `erddap_sync` | `ghcr.io/astral-sh/uv` | One-shot. Runs the national `sync-erddap-datasets.py`: harvests the regional CIOOS servers and merges every `datasets.d/*.xml` fragment (incl. the ECCC buoy fragment) into `datasets.xml`, then exits. | — |
-| `erddap` | `erddap/erddap:v2.28.1` | CIOOS National ERDDAP (from the submodule). Serves the regional datasets **and** the ECCC buoy dataset. Waits for `erddap_sync`. | `8080` |
+| Service | Image | Defined in | Purpose | Port |
+| --- | --- | --- | --- | --- |
+| `prefect` | `prefecthq/prefect:3-latest` | this repo | Prefect 3 server (UI + API). The parser registers its flows/tasks here. | `4200` |
+| `eccc_buoy_parser` | built from `./ECCC_Buoy_Parser/Dockerfile` | this repo | Long-running AMQP consumer + parser (`app/amqp_client.py`). | — |
+| `erddap_sync` | `ghcr.io/astral-sh/uv` | this repo | One-shot. Runs the national `sync-erddap-datasets.py`: harvests the regional CIOOS servers and merges every `datasets.d/*.xml` fragment (incl. the ECCC buoy fragment) into `datasets.xml`, then exits. | — |
+| `erddap` | `erddap/erddap:v2.28.1` | `include`d from submodule | CIOOS National ERDDAP. Serves the regional datasets **and** the ECCC buoy dataset. This repo only adds `depends_on: erddap_sync`. | `8080` |
 
 The national ERDDAP lives in the [`cioos-national-erddap`](https://github.com/cioos-siooc/cioos-national-erddap)
-submodule. Its `datasets/` directory is the contract between the parser (writer)
-and ERDDAP (reader); the parser writes NCCSV there and ERDDAP mounts it.
+submodule. `include` rebases that compose's relative paths onto the submodule
+directory, so its `datasets/`, `datasets.d/`, and `erddap/content/` are the same
+dirs this stack writes to — the parser writes NCCSV into `datasets/` and ERDDAP
+reads it, with no path juggling.
 
 ```
 MSC Datamart (AMQPS)
@@ -53,6 +59,14 @@ Clone with the submodule (or initialise it in an existing clone):
 git clone --recurse-submodules git@github.com:cioos-siooc/ECCC_Buoy_Parser.git
 # or, in an existing clone:
 git submodule update --init
+```
+
+The included ERDDAP service needs an env file at `cioos-national-erddap/.env`
+(it's `env_file`'d by the submodule compose and supplies `${ERDDAP_PORT}`).
+Create one before the first run, e.g.:
+
+```sh
+printf 'ERDDAP_PORT=8080\nERDDAP_flagKeyKey=changeme-local\n' > cioos-national-erddap/.env
 ```
 
 From the repo root:

@@ -1,3 +1,13 @@
+# The ERDDAP service itself is not defined here — it is pulled in from the
+# cioos-national-erddap submodule's own docker-compose.yml via `include`.
+# `include` rebases that file's relative paths (./erddap/content, ./datasets,
+# ./datasets.d, ./.env) onto the submodule directory, which is exactly where
+# this stack writes buoy NCCSV, drops the datasets.d fragment, and runs the
+# sync — so everything lines up without redefining the service here.
+include:
+  - path: cioos-national-erddap/docker-compose.yml
+    env_file: cioos-national-erddap/.env
+
 services:
   prefect:
     image: prefecthq/prefect:3-latest
@@ -24,7 +34,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       # Buoy NCCSV files are written into the national ERDDAP submodule's shared
-      # datasets dir, which the erddap service below reads at /datasets.
+      # datasets dir, which the (included) erddap service reads at /datasets.
       - ./cioos-national-erddap/datasets:/app/datasets
       - ./ECCC_Buoy_Parser/app/config:/app/config
       - ./ECCC_Buoy_Parser/app/data:/app/data
@@ -51,39 +61,9 @@ services:
     command: ["uv", "run", "sync-erddap-datasets.py"]
     restart: "no"
 
-  # National CIOOS ERDDAP (served from the cioos-national-erddap submodule).
-  # Replaces the parser's previously-bundled ERDDAP; serves the regional
-  # datasets plus the ECCC buoy dataset written by eccc_buoy_parser.
+  # erddap is defined in the included submodule compose; only add the ordering
+  # so it starts after the one-shot sync has merged datasets.xml.
   erddap:
-    image: erddap/erddap:v2.28.1
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./cioos-national-erddap/erddap/conf/robots.txt:/usr/local/tomcat/webapps/ROOT/robots.txt
-      - ./cioos-national-erddap/erddap/content:/usr/local/tomcat/content/erddap
-      - ./cioos-national-erddap/erddap/data:/erddapData
-      - ./cioos-national-erddap/datasets:/datasets
-      - ./cioos-national-erddap/datasets.d:/datasets.d
-    environment:
-      ERDDAP_MIN_MEMORY: 1G
-      ERDDAP_MAX_MEMORY: 2G
-      ERDDAP_bigParentDirectory: /erddapData/
-      ERDDAP_baseUrl: http://localhost:8080
-      ERDDAP_baseHttpsUrl: https://localhost:8080
-      ERDDAP_flagKeyKey: changed
-      ERDDAP_emailEverythingTo: this+goes+nowhere@doesnotexist.ioos.us
-      ERDDAP_adminInstitution: Canadian Integrated Ocean Observing System
-      ERDDAP_adminInstitutionUrl: https://cioos.ca/
-      ERDDAP_adminIndividualName: CIOOS Data Manager
-      ERDDAP_adminPosition: Data Manager
-      ERDDAP_adminPhone: ""
-      ERDDAP_adminAddress: ""
-      ERDDAP_adminCity: Halifax
-      ERDDAP_adminStateOrProvince: NS
-      ERDDAP_adminPostalCode: ""
-      ERDDAP_adminCountry: CA
-      ERDDAP_adminEmail: info@cioos.ca
     depends_on:
       erddap_sync:
         condition: service_completed_successfully
