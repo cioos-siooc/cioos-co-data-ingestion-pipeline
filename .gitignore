@@ -10,7 +10,15 @@
 *.out.previous
 *.cdl
 __pycache__/
+.venv/
+logs/
 !ECCCbuoys_types.json
 !setup.xml
 !robots.txt
 *.bak
+
+# MEDS buoy parser: keep the curated ERDDAP fragment and test fixtures,
+# ignore runtime work dirs (downloaded zips / extracted / fixed CSVs).
+MEDS_Buoy_Parser/app/data/
+!MEDS_Buoy_Parser/erddap_config/MEDS.xml
+!MEDS_Buoy_Parser/app/test/sample_csv/*.csv

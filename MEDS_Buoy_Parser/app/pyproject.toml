@@ -1,0 +1,11 @@
+[project]
+name = "meds-buoy-parser"
+version = "0.1.0"
+description = "Download DFO MEDS buoy CSV data and publish it to the CIOOS National ERDDAP"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.0",
+    "prefect>=3.4.22",
+    "requests>=2.32.5",
+]

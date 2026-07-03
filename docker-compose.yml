@@ -1,3 +1,13 @@
+# The ERDDAP service itself is not defined here — it is pulled in from the
+# cioos-national-erddap submodule's own docker-compose.yml via `include`.
+# `include` rebases that file's relative paths (./erddap/content, ./datasets,
+# ./datasets.d, ./.env) onto the submodule directory, which is exactly where
+# this stack writes buoy NCCSV, drops the datasets.d fragment, and runs the
+# sync — so everything lines up without redefining the service here.
+include:
+  - path: cioos-national-erddap/docker-compose.yml
+    env_file: cioos-national-erddap/.env
+
 services:
   prefect:
     image: prefecthq/prefect:3-latest
@@ -17,13 +27,15 @@ services:
       retries: 30
       start_period: 30s
     restart: unless-stopped
-    
+
   eccc_buoy_parser:
     build:
       context: ./ECCC_Buoy_Parser
       dockerfile: Dockerfile
     volumes:
-      - ./datasets:/app/datasets
+      # Buoy NCCSV files are written into the national ERDDAP submodule's shared
+      # datasets dir, which the (included) erddap service reads at /datasets.
+      - ./cioos-national-erddap/datasets:/app/datasets
       - ./ECCC_Buoy_Parser/app/config:/app/config
       - ./ECCC_Buoy_Parser/app/data:/app/data
     environment:
@@ -33,38 +45,48 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  erddap:
-    image: axiom/docker-erddap:v2.28.1
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
+  # Non-real-time MEDS buoy pipeline: a scheduled Prefect flow that downloads the
+  # MEDS CSV archive, fixes it, and writes per-station CSVs into the same national
+  # ERDDAP datasets dir. Served on a daily cron (see MEDS_CRON); trigger a run
+  # from the Prefect UI to populate immediately on first boot.
+  meds_buoy_parser:
+    build:
+      context: ./MEDS_Buoy_Parser
+      dockerfile: Dockerfile
     volumes:
-      - ./erddap/conf/robots.txt:/usr/local/tomcat/webapps/ROOT/robots.txt
-      - ./erddap/content:/usr/local/tomcat/content/erddap
-      - ./erddap/data:/erddapData
-      - ./erddap/datasets.d:/datasets.d
-      - ./datasets:/datasets
-      - ./scripts:/scripts
+      - ./cioos-national-erddap/datasets:/app/datasets
+      - ./MEDS_Buoy_Parser/app/data:/app/data
     environment:
-      ERDDAP_MIN_MEMORY: 1G
-      ERDDAP_MAX_MEMORY: 2G
-      ERDDAP_bigParentDirectory: /erddapData/
-      ERDDAP_baseUrl: http://localhost:8080
-      ERDDAP_baseHttpsUrl: https://localhost:8080
-      ERDDAP_flagKeyKey: changed
-      ERDDAP_emailEverythingTo: this+goes+nowhere@doesnotexist.ioos.us
-      ERDDAP_adminInstitution: Integrated Ocean Observing System (IOOS)
-      ERDDAP_adminInstitutionUrl: https://ioos.github.io/
-      ERDDAP_adminIndividualName: IOOS Data Manager
-      ERDDAP_adminPosition: Data Manager
-      ERDDAP_adminPhone: "240-533-9444"
-      ERDDAP_adminAddress: "1315 East-West Highway 2nd Floor"
-      ERDDAP_adminCity: Silver Spring
-      ERDDAP_adminStateOrProvince: MD
-      ERDDAP_adminPostalCode: "20910"
-      ERDDAP_adminCountry: USA
-      ERDDAP_adminEmail: data.ioos@noaa.gov  
+      - PREFECT_API_URL=http://prefect:4200/api
+      - MEDS_CRON=0 6 * * *
+      # - MEDS_STATIONS=c46131,meds210,wel233   # optional dev allowlist
+    depends_on:
+      prefect:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # One-shot: run the national ERDDAP sync (from the cioos-national-erddap
+  # submodule). It harvests the regional CIOOS servers AND merges every
+  # datasets.d/*.xml fragment (including the ECCC buoy fragment) into
+  # erddap/content/datasets.xml, then exits. erddap waits for it to finish.
+  erddap_sync:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /work
+    volumes:
+      - ./cioos-national-erddap:/work
+    environment:
+      # Keep uv's venv/cache out of the (git-tracked) submodule working tree.
+      UV_PROJECT_ENVIRONMENT: /venv
+      UV_CACHE_DIR: /uvcache
+    command: ["uv", "run", "sync-erddap-datasets.py"]
+    restart: "no"
+
+  # erddap is defined in the included submodule compose; only add the ordering
+  # so it starts after the one-shot sync has merged datasets.xml.
+  erddap:
+    depends_on:
+      erddap_sync:
+        condition: service_completed_successfully
 
 volumes:
   prefect_data:
-

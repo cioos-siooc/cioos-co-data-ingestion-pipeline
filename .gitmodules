@@ -1,0 +1,5 @@
+[submodule "cioos-national-erddap"]
+	path = cioos-national-erddap
+	url = git@github.com:cioos-siooc/cioos-national-erddap.git
+	branch = feat/datasets.d
+	ignore = dirty

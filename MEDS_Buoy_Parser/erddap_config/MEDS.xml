@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Curated ERDDAP dataset fragment for the DFO MEDS buoy CSVs.
+
+  This is the reviewed, hand-tuned definition. GenerateDatasetsXml_medsbuoys.sh
+  installs it into cioos-national-erddap/datasets.d/MEDS.xml, where the national
+  sync-erddap-datasets.py merges it into datasets.xml.
+
+  <sourceName>s match exactly the columns written by meds_fix.py (the fixed CSVs
+  use clean names — VWH, VTP, WSS, WDIR_2, ... — not the raw MEDS `$`/duplicate
+  header names). All buoy types (C*, MEDS*, WEL*) share this one unified column
+  set; historic buoys simply have empty wind/pressure/temperature cells.
+-->
+<erddapDatasets>
+
+    <dataset type="EDDTableFromAsciiFiles" datasetID="MEDS_CSV" active="true">
+        <reloadEveryNMinutes>1440</reloadEveryNMinutes>
+        <updateEveryNMillis>10000</updateEveryNMillis>
+        <fileDir>/datasets/MEDS_CSV/</fileDir>
+        <fileNameRegex>.*\.csv</fileNameRegex>
+        <recursive>true</recursive>
+        <pathRegex>.*</pathRegex>
+        <metadataFrom>last</metadataFrom>
+        <standardizeWhat>0</standardizeWhat>
+        <charset>UTF-8</charset>
+        <columnSeparator>,</columnSeparator>
+        <columnNamesRow>1</columnNamesRow>
+        <firstDataRow>2</firstDataRow>
+        <sortedColumnSourceName>DATE</sortedColumnSourceName>
+        <sortFilesBySourceNames>STN_ID DATE</sortFilesBySourceNames>
+        <fileTableInMemory>false</fileTableInMemory>
+        <accessibleViaFiles>true</accessibleViaFiles>
+        <addAttributes>
+            <att name="cdm_data_type">TimeSeries</att>
+            <att name="cdm_timeseries_variables">STN_ID</att>
+            <att name="Conventions">COARDS, CF-1.6, ACDD-1.3</att>
+            <att name="infoUrl">http://www.meds-sdmm.dfo-mpo.gc.ca/isdm-gdsi/waves-vagues/formats-eng.html#CSV</att>
+            <att name="institution">DFO MEDS</att>
+            <att name="creator_name">Fisheries and Oceans Canada, Marine Environmental Data Section (MEDS)</att>
+            <att name="creator_url">https://www.meds-sdmm.dfo-mpo.gc.ca/</att>
+            <att name="keywords">atmosphere, atmospheric, atms, buoy, data, date, depth, dry bulb, DFO, dryt, gust, latitude, longitude, MEDS, pressure, Q_FLAG, quality, sea surface temperature, sst, sstp, station, STN_ID, surface waves, time, vcar, vcmx, vtp, vtpk, vwh, wave height, wave period, wdir, wind, wind direction, wind speed, wspd, wss</att>
+            <att name="keywords_vocabulary">GCMD Science Keywords</att>
+            <att name="license">[standard]</att>
+            <att name="sourceUrl">(local files)</att>
+            <att name="standard_name_vocabulary">CF Standard Name Table v55</att>
+            <att name="subsetVariables">STN_ID, Q_FLAG</att>
+            <att name="summary">Non-real-time wave, wind, atmospheric and sea-surface-temperature observations from DFO Marine Environmental Data Section (MEDS) moored buoys, downloaded from the MEDS waveshare CSV archive. Includes modern "C" buoys (full met + wave suite) and historic "MEDS"/"WEL" buoys (wave only). Longitudes have been converted to degrees east and dates to ISO 8601 (UTC); LATITUDE/LONGITUDE are the fixed deployment position while preciseLat/preciseLon retain the original per-record coordinate.</att>
+            <att name="title">DFO MEDS moored buoy data (CSV archive)</att>
+        </addAttributes>
+        <dataVariable>
+            <sourceName>STN_ID</sourceName>
+            <destinationName>STN_ID</destinationName>
+            <dataType>String</dataType>
+            <addAttributes>
+                <att name="ioos_category">Identifier</att>
+                <att name="long_name">Station ID</att>
+                <att name="cf_role">timeseries_id</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>DATE</sourceName>
+            <destinationName>time</destinationName>
+            <dataType>String</dataType>
+            <addAttributes>
+                <att name="ioos_category">Time</att>
+                <att name="long_name">Time</att>
+                <att name="source_name">DATE</att>
+                <att name="standard_name">time</att>
+                <att name="time_precision">1970-01-01T00:00:00Z</att>
+                <att name="units">yyyy-MM-dd&#39;T&#39;HH:mm:ss&#39;Z&#39;</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>Q_FLAG</sourceName>
+            <destinationName>Q_FLAG</destinationName>
+            <dataType>byte</dataType>
+            <addAttributes>
+                <att name="ioos_category">Quality</att>
+                <att name="colorBarMaximum" type="double">10.0</att>
+                <att name="colorBarMinimum" type="double">0.0</att>
+                <att name="long_name">Quality Flag</att>
+                <att name="comment">
+            0: Blank - No quality control (QC) has been performed
+            1: Good - QC has been performed: record appears correct
+            3: Doubtful - QC has been performed: record appears doubtful
+            4: Erroneous - QC has been performed: record appears erroneous
+            5: Changes - The record has been changed as a result of QC
+            6: Acceptable - QC has been performed: record seems inconsistent with other records
+            7: Off Position - There is a problem with the buoy position or mooring. Data may still be useful.
+            8: Reserved
+            9: Reserved - indicates missing elements
+                </att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>LATITUDE</sourceName>
+            <destinationName>latitude</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="ioos_category">Location</att>
+                <att name="colorBarMaximum" type="double">90.0</att>
+                <att name="colorBarMinimum" type="double">-90.0</att>
+                <att name="long_name">Latitude (deployment)</att>
+                <att name="standard_name">latitude</att>
+                <att name="units">degrees_north</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>LONGITUDE</sourceName>
+            <destinationName>longitude</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="ioos_category">Location</att>
+                <att name="colorBarMaximum" type="double">180.0</att>
+                <att name="colorBarMinimum" type="double">-180.0</att>
+                <att name="long_name">Longitude (deployment)</att>
+                <att name="standard_name">longitude</att>
+                <att name="units">degrees_east</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>DEPTH</sourceName>
+            <destinationName>depth</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Location</att>
+                <att name="colorBarMaximum" type="double">8000.0</att>
+                <att name="colorBarMinimum" type="double">-8000.0</att>
+                <att name="colorBarPalette">TopographyDepth</att>
+                <att name="long_name">Depth</att>
+                <att name="standard_name">depth</att>
+                <att name="units">m</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>VCAR</sourceName>
+            <destinationName>VCAR</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Surface Waves</att>
+                <att name="long_name">Characteristic significant wave height</att>
+                <att name="units">m</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>VTPK</sourceName>
+            <destinationName>VTPK</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Surface Waves</att>
+                <att name="long_name">Wave spectrum peak period</att>
+                <att name="units">s</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>VWH</sourceName>
+            <destinationName>VWH</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Surface Waves</att>
+                <att name="long_name">Characteristic significant wave height (reported by the buoy)</att>
+                <att name="units">m</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>VCMX</sourceName>
+            <destinationName>VCMX</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Surface Waves</att>
+                <att name="long_name">Maximum zero crossing wave height (reported by the buoy)</att>
+                <att name="units">m</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>VTP</sourceName>
+            <destinationName>VTP</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Surface Waves</att>
+                <att name="long_name">Wave spectrum peak period (reported by the buoy)</att>
+                <att name="units">s</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>WDIR</sourceName>
+            <destinationName>WDIR</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Direction from which the wind is blowing</att>
+                <att name="standard_name">wind_from_direction</att>
+                <att name="units">degrees_true</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>WSPD</sourceName>
+            <destinationName>WSPD</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="colorBarMaximum" type="double">15.0</att>
+                <att name="colorBarMinimum" type="double">0.0</att>
+                <att name="long_name">Wind Speed</att>
+                <att name="standard_name">wind_speed</att>
+                <att name="units">m s-1</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>WSS</sourceName>
+            <destinationName>WSS</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Horizontal scalar wind speed</att>
+                <att name="standard_name">wind_speed</att>
+                <att name="units">m s-1</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>GSPD</sourceName>
+            <destinationName>GSPD</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Gust wind speed</att>
+                <att name="standard_name">wind_speed_of_gust</att>
+                <att name="units">m s-1</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>WDIR_2</sourceName>
+            <destinationName>WDIR_2</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Direction from which the wind is blowing (secondary sensor)</att>
+                <att name="standard_name">wind_from_direction</att>
+                <att name="units">degrees_true</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>WSPD_2</sourceName>
+            <destinationName>WSPD_2</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Wind speed (secondary sensor)</att>
+                <att name="standard_name">wind_speed</att>
+                <att name="units">m s-1</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>WSS_2</sourceName>
+            <destinationName>WSS_2</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Horizontal scalar wind speed (secondary sensor)</att>
+                <att name="standard_name">wind_speed</att>
+                <att name="units">m s-1</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>GSPD_2</sourceName>
+            <destinationName>GSPD_2</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Wind</att>
+                <att name="long_name">Gust wind speed (secondary sensor)</att>
+                <att name="standard_name">wind_speed_of_gust</att>
+                <att name="units">m s-1</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>ATMS</sourceName>
+            <destinationName>ATMS</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Pressure</att>
+                <att name="long_name">Atmospheric pressure at sea level</att>
+                <att name="standard_name">air_pressure_at_sea_level</att>
+                <att name="units">mbar</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>ATMS_2</sourceName>
+            <destinationName>ATMS_2</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Pressure</att>
+                <att name="long_name">Atmospheric pressure at sea level (secondary sensor)</att>
+                <att name="standard_name">air_pressure_at_sea_level</att>
+                <att name="units">mbar</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>DRYT</sourceName>
+            <destinationName>DRYT</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Temperature</att>
+                <att name="long_name">Dry bulb air temperature</att>
+                <att name="standard_name">air_temperature</att>
+                <att name="units">degree_C</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>SSTP</sourceName>
+            <destinationName>SSTP</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
+                <att name="ioos_category">Temperature</att>
+                <att name="long_name">Sea surface temperature</att>
+                <att name="standard_name">sea_surface_temperature</att>
+                <att name="units">degree_C</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>preciseLat</sourceName>
+            <destinationName>preciseLat</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="ioos_category">Location</att>
+                <att name="colorBarMaximum" type="double">90.0</att>
+                <att name="colorBarMinimum" type="double">-90.0</att>
+                <att name="long_name">Latitude (per-record, as reported)</att>
+                <att name="units">degrees_north</att>
+            </addAttributes>
+        </dataVariable>
+        <dataVariable>
+            <sourceName>preciseLon</sourceName>
+            <destinationName>preciseLon</destinationName>
+            <dataType>float</dataType>
+            <addAttributes>
+                <att name="ioos_category">Location</att>
+                <att name="colorBarMaximum" type="double">180.0</att>
+                <att name="colorBarMinimum" type="double">-180.0</att>
+                <att name="long_name">Longitude (per-record, as reported)</att>
+                <att name="units">degrees_east</att>
+            </addAttributes>
+        </dataVariable>
+    </dataset>
+</erddapDatasets>

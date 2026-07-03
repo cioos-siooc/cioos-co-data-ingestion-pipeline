@@ -1,145 +1,134 @@
 # ECCC_Buoy_Parser
 
-A pipeline that subscribes to Environment and Climate Change Canada (ECCC) /
-Meteorological Service of Canada (MSC) Datamart real-time marine buoy
-notifications over AMQP, downloads the SWOB-ML XML files, converts them to
-ERDDAP-compatible NCCSV, and serves them via a local ERDDAP instance.
+Two pipelines that publish Canadian marine buoy data to the **CIOOS National
+ERDDAP** (vendored here as the `cioos-national-erddap` git submodule):
+
+- **`eccc_buoy_parser`** — subscribes to ECCC/MSC Datamart over AMQP in
+  real time, converts SWOB-ML XML to NCCSV, publishes the `ECCCbuoys` dataset.
+  Details: [`ECCC_Buoy_Parser/README.md`](ECCC_Buoy_Parser/README.md).
+- **`meds_buoy_parser`** — downloads the DFO MEDS buoy CSV archive on a daily
+  schedule, publishes the `MEDS_CSV` dataset. Details:
+  [`MEDS_Buoy_Parser/README.md`](MEDS_Buoy_Parser/README.md).
+
+Both follow the same pattern: parser writes CSV/NCCSV files into a shared
+`datasets/` directory, a `GenerateDatasetsXml_*.sh` script writes an ERDDAP
+dataset fragment into `datasets.d/`, and `erddap_sync` merges every fragment
+into `datasets.xml` for ERDDAP to serve.
 
 ## Architecture
 
-The stack is three Docker services orchestrated by `docker-compose.yml`:
-
-| Service | Image | Purpose | Port |
+| Service | Defined in | Purpose | Port |
 | --- | --- | --- | --- |
-| `prefect` | `prefecthq/prefect:3-latest` | Prefect 3 server (UI + API). The parser registers its flows/tasks here. | `4200` |
-| `eccc_buoy_parser` | built from `./ECCC_Buoy_Parser/Dockerfile` | Long-running AMQP consumer + parser (`app/amqp_client.py`). | — |
-| `erddap` | `axiom/docker-erddap:v2.28.1` | Serves the NCCSV files written by the parser. | `8080` |
-
-The shared `./datasets` directory is the contract between the parser (writer)
-and ERDDAP (reader). Both containers mount it.
+| `prefect` | this repo | Prefect 3 server (UI + API) for both parsers | `4200` |
+| `eccc_buoy_parser` | this repo | Real-time AMQP consumer + parser | — |
+| `meds_buoy_parser` | this repo | Daily batch MEDS download + parser | — |
+| `erddap_sync` | this repo | One-shot: harvests regional CIOOS servers + merges `datasets.d/*.xml` into `datasets.xml`, then exits | — |
+| `erddap` | `include`d from the `cioos-national-erddap` submodule | Serves all datasets | `8080` |
 
 ```
-MSC Datamart (AMQPS)
-        │
-        ▼
- eccc_buoy_parser ──writes──► ./datasets/ECCCbuoys/*.csv ──reads──► erddap
-        │
-        └──registers flows──► prefect
+eccc_buoy_parser ──► datasets/ECCCbuoys/*.csv  ──┐
+meds_buoy_parser ──► datasets/MEDS_CSV/*.csv   ──┤
+                                                  ▼
+              GenerateDatasetsXml_*.sh ──► datasets.d/{ECCC,MEDS}.xml
+                                                  │
+                              erddap_sync merges into datasets.xml
+                                                  │
+                                                  ▼
+                                     erddap ──► :8080/erddap
 ```
 
-## Prerequisites
+## Setup
 
-- Docker Engine + Docker Compose v2 (`docker compose ...`).
-- Outbound access to `dd.weather.gc.ca:5671` (AMQPS) and HTTPS for SWOB-ML
-  downloads.
-- Free local ports: `4200` (Prefect), `8080` (ERDDAP).
+**1. Clone with the submodule**
 
-## Quick start
+```sh
+git clone --recurse-submodules git@github.com:cioos-siooc/ECCC_Buoy_Parser.git
+# or, in an existing clone:
+git submodule update --init
+```
 
-From the repo root:
+**2. Create the ERDDAP env file** (`cioos-national-erddap/.env`)
+
+```sh
+printf 'ERDDAP_PORT=8080\nERDDAP_flagKeyKey=changeme-local\n' > cioos-national-erddap/.env
+```
+
+`flagKeyKey` is a secret ERDDAP requires to be non-default; any local value
+works for development.
+
+**3. Start the stack**
 
 ```sh
 docker compose up --build
 ```
 
-First boot takes a few minutes — Prefect must report healthy before the parser
-container starts (`depends_on: service_healthy`), and ERDDAP needs a moment to
-initialise Tomcat.
+First boot takes a few minutes: Prefect must be healthy before the parsers
+start, and `erddap_sync` must finish before `erddap` starts. Both parsers
+register their flows with Prefect but don't produce data until they run —
+the ECCC parser reacts to incoming AMQP messages, the MEDS parser waits for
+its daily cron (or a manual trigger).
 
-Once everything is up:
+**4. Generate the ERDDAP dataset fragments**
 
-- **Prefect UI** — <http://localhost:4200>. Watch `process_message_flow` runs as
-  buoy notifications arrive.
-- **ERDDAP** — <http://localhost:8080/erddap/index.html>. Datasets appear once
-  `datasets.xml` references them and NCCSV files exist in `./datasets/ECCCbuoys/`.
-- **Parser logs** — `docker compose logs -f eccc_buoy_parser`.
-
-Stop everything:
+Each parser has its own script. Run them after the parsers have written at
+least some data:
 
 ```sh
-docker compose down
+./GenerateDatasetsXml_ecccbuoys.sh   # reads datasets/ECCCbuoys/*.csv  -> datasets.d/ECCC.xml
+./GenerateDatasetsXml_medsbuoys.sh   # installs a curated fragment     -> datasets.d/MEDS.xml
 ```
 
-Add `-v` to also drop the `prefect_data` volume.
+The ECCC script regenerates its fragment from the current NCCSV files every
+run. The MEDS script installs a pre-built, reviewed fragment
+(`MEDS_Buoy_Parser/erddap_config/MEDS.xml`) rather than generating one from
+scratch — pass `--generate` to also produce a draft from ERDDAP's own tool for
+comparison when the column set changes.
 
-## First-run notes
+**5. Load the fragments into ERDDAP**
 
-- The parser binds a **durable, named** queue
-  `q_anonymous.subscribe.marine_buoys.{hostname}_dev2` on the broker. The
-  `dev2` suffix is hard-coded in `app/amqp_client.py` so restarts reuse the
-  same queue and don't lose backlog. Changing it creates a brand-new queue;
-  the old one stays on the broker until it expires.
-- New buoys auto-extend `ECCC_Buoy_Parser/app/config/ECCCbuoys_json_fields.json`
-  (gitignored) and `ECCCbuoys_types.json` (checked in) the first time they're
-  seen. Expect those files to grow on first run.
-- ERDDAP won't list a dataset until you wire it into
-  `erddap/content/datasets.xml` — see the next section.
-
-## Generating ERDDAP `datasets.xml`
-
-`erddap/content/datasets.xml` is generated, not hand-written. Two helpers wrap
-the `axiom/docker-erddap` image's `GenerateDatasetsXml.sh`:
+Fragments are picked up automatically the next time `erddap_sync` runs (e.g.
+on the next `docker compose up`). To reload a running ERDDAP without
+restarting:
 
 ```sh
-# Pre-baked args for the ECCC buoy NCCSV directory:
-./GenerateDatasetsXml_ecccbuoys.sh
-
-# Or run it interactively and answer the prompts yourself:
-./GenerateDatasetsXml.sh
+docker compose run --rm erddap_sync
+docker compose exec erddap touch /erddapData/flag/ECCCbuoys_<id>
+docker compose exec erddap touch /erddapData/flag/MEDS_CSV
 ```
 
-Copy the relevant `<dataset>...</dataset>` block into
-`erddap/content/datasets.xml` and either restart the `erddap` service or touch
-its flag file to reload.
+**6. Verify**
 
-To validate a single dataset definition:
+- Prefect UI: <http://localhost:4200>
+- ERDDAP: <http://localhost:8080/erddap/tabledap/MEDS_CSV.html> and `/ECCCbuoys_<id>.html`
+
+To validate a fragment's parsed types without a full reload: `./DasDds.sh`.
+
+## When do the generate scripts need rerunning?
+
+Only when the **set of columns** changes (e.g. a new sensor field appears in
+the source data) — that's a fragment/schema change. New stations/buoys
+appearing in already-known columns don't require it: ERDDAP dataset
+directories are scanned by regex, so new files matching the pattern are
+picked up on the next reload with no fragment change needed.
+
+Stop everything with `docker compose down` (add `-v` to also drop the
+`prefect_data` volume).
+
+## Local development (without Docker)
 
 ```sh
-./DasDds.sh
+cd ECCC_Buoy_Parser/app && uv sync && uv run python amqp_client.py   # needs PREFECT_API_URL reachable
+cd MEDS_Buoy_Parser/app  && uv sync && uv run python tests.py        # offline, no network
 ```
 
-## Local development (parser only)
+Both are Python 3.12, packaged with `uv` (`uv.lock` committed).
 
-If you just want to iterate on the parser without rebuilding the container:
+## Notes
 
-```sh
-cd ECCC_Buoy_Parser/app
-uv sync
-uv run python amqp_client.py
-```
-
-You'll need a Prefect server reachable at `PREFECT_API_URL` (start just that
-service: `docker compose up prefect`).
-
-To reprocess a directory of cached XML files (no AMQP needed — useful when
-changing parser logic):
-
-```sh
-cd ECCC_Buoy_Parser/app
-uv run python tests.py   # ad-hoc driver, not a pytest suite
-```
-
-Python 3.12, packaged with `uv` (`uv.lock` is committed).
-
-## Path coupling — read before moving things
-
-`docker-compose.yml` mounts:
-
-- `./datasets` → parser `/app/datasets` **and** ERDDAP `/datasets`. Don't break
-  this — it's how data gets from the parser to ERDDAP.
-- `./ECCC_Buoy_Parser/app/config` → parser `/app/config`. Note this is **not**
-  the same as the top-level `./config/` directory (which contains a duplicate
-  `ECCCbuoys_types.json`). The duplication is intentional but easy to confuse.
-- `./erddap/content` → ERDDAP's Tomcat content dir. `datasets.xml` lives here.
-
-The parser uses relative paths (`./datasets/...`, `./config/...`) so it works
-both from `app/` locally and `/app` in the container. If you change the working
-directory or volume layout, fix the paths in `marine_buoy_parser.py` together.
-
-## Pinned versions
-
-- ERDDAP: `v2.28.1` in compose; `2.23-jdk17-openjdk` in
-  `GenerateDatasetsXml_ecccbuoys.sh`. The NCCSV header conventions in
-  `marine_buoy_parser.py` target these — change deliberately.
-- Prefect: `3-latest`.
-- Python: `3.12`.
+- `docker-compose.yml` mounts `./cioos-national-erddap/datasets` into both
+  parsers and into ERDDAP — this is how files reach ERDDAP. Don't change the
+  paths on one side without the other.
+- The `cioos-national-erddap` submodule is pinned to branch `feat/datasets.d`.
+- ERDDAP version: `erddap/erddap:v2.28.1` (via the submodule's compose);
+  `axiom/docker-erddap:2.23-jdk17-openjdk` is used by the `GenerateDatasetsXml_*`
+  scripts to run ERDDAP's own generator tool.
