@@ -18,7 +18,8 @@ single-source-of-truth in the national repo.
 | --- | --- | --- | --- | --- |
 | `prefect` | `prefecthq/prefect:3-latest` | this repo | Prefect 3 server (UI + API). The parser registers its flows/tasks here. | `4200` |
 | `eccc_buoy_parser` | built from `./ECCC_Buoy_Parser/Dockerfile` | this repo | Long-running AMQP consumer + parser (`app/amqp_client.py`). | — |
-| `erddap_sync` | `ghcr.io/astral-sh/uv` | this repo | One-shot. Runs the national `sync-erddap-datasets.py`: harvests the regional CIOOS servers and merges every `datasets.d/*.xml` fragment (incl. the ECCC buoy fragment) into `datasets.xml`, then exits. | — |
+| `meds_buoy_parser` | built from `./MEDS_Buoy_Parser/Dockerfile` | this repo | Scheduled (daily) batch flow that downloads the non-real-time DFO MEDS buoy CSV archive and publishes it as the `MEDS_CSV` dataset (`MEDS_Buoy_Parser/app/flow.py`). See [`MEDS_Buoy_Parser/README.md`](MEDS_Buoy_Parser/README.md). | — |
+| `erddap_sync` | `ghcr.io/astral-sh/uv` | this repo | One-shot. Runs the national `sync-erddap-datasets.py`: harvests the regional CIOOS servers and merges every `datasets.d/*.xml` fragment (incl. the ECCC and MEDS buoy fragments) into `datasets.xml`, then exits. | — |
 | `erddap` | `erddap/erddap:v2.28.1` | `include`d from submodule | CIOOS National ERDDAP. Serves the regional datasets **and** the ECCC buoy dataset. This repo only adds `depends_on: erddap_sync`. | `8080` |
 
 The national ERDDAP lives in the [`cioos-national-erddap`](https://github.com/cioos-siooc/cioos-national-erddap)
@@ -135,6 +136,10 @@ docker compose exec erddap touch /erddapData/flag/<datasetID>
 
 The fragment is generated output — it is not committed to the submodule; only
 the `datasets.d/` mechanism itself lives in `cioos-national-erddap`.
+
+The MEDS buoy dataset works the same way but ships a curated fragment; install it
+with `./GenerateDatasetsXml_medsbuoys.sh` (see
+[`MEDS_Buoy_Parser/README.md`](MEDS_Buoy_Parser/README.md)).
 
 To validate a single dataset definition:
 

@@ -45,6 +45,26 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Non-real-time MEDS buoy pipeline: a scheduled Prefect flow that downloads the
+  # MEDS CSV archive, fixes it, and writes per-station CSVs into the same national
+  # ERDDAP datasets dir. Served on a daily cron (see MEDS_CRON); trigger a run
+  # from the Prefect UI to populate immediately on first boot.
+  meds_buoy_parser:
+    build:
+      context: ./MEDS_Buoy_Parser
+      dockerfile: Dockerfile
+    volumes:
+      - ./cioos-national-erddap/datasets:/app/datasets
+      - ./MEDS_Buoy_Parser/app/data:/app/data
+    environment:
+      - PREFECT_API_URL=http://prefect:4200/api
+      - MEDS_CRON=0 6 * * *
+      # - MEDS_STATIONS=c46131,meds210,wel233   # optional dev allowlist
+    depends_on:
+      prefect:
+        condition: service_healthy
+    restart: unless-stopped
+
   # One-shot: run the national ERDDAP sync (from the cioos-national-erddap
   # submodule). It harvests the regional CIOOS servers AND merges every
   # datasets.d/*.xml fragment (including the ECCC buoy fragment) into
