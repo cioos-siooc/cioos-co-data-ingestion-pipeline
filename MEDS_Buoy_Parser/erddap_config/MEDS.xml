@@ -123,6 +123,7 @@
             <destinationName>depth</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Location</att>
                 <att name="colorBarMaximum" type="double">8000.0</att>
                 <att name="colorBarMinimum" type="double">-8000.0</att>
@@ -137,6 +138,7 @@
             <destinationName>VCAR</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Surface Waves</att>
                 <att name="long_name">Characteristic significant wave height</att>
                 <att name="units">m</att>
@@ -147,6 +149,7 @@
             <destinationName>VTPK</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Surface Waves</att>
                 <att name="long_name">Wave spectrum peak period</att>
                 <att name="units">s</att>
@@ -157,6 +160,7 @@
             <destinationName>VWH</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Surface Waves</att>
                 <att name="long_name">Characteristic significant wave height (reported by the buoy)</att>
                 <att name="units">m</att>
@@ -167,6 +171,7 @@
             <destinationName>VCMX</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Surface Waves</att>
                 <att name="long_name">Maximum zero crossing wave height (reported by the buoy)</att>
                 <att name="units">m</att>
@@ -177,6 +182,7 @@
             <destinationName>VTP</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Surface Waves</att>
                 <att name="long_name">Wave spectrum peak period (reported by the buoy)</att>
                 <att name="units">s</att>
@@ -187,6 +193,7 @@
             <destinationName>WDIR</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Direction from which the wind is blowing</att>
                 <att name="standard_name">wind_from_direction</att>
@@ -198,6 +205,7 @@
             <destinationName>WSPD</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="colorBarMaximum" type="double">15.0</att>
                 <att name="colorBarMinimum" type="double">0.0</att>
@@ -211,6 +219,7 @@
             <destinationName>WSS</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Horizontal scalar wind speed</att>
                 <att name="standard_name">wind_speed</att>
@@ -222,6 +231,7 @@
             <destinationName>GSPD</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Gust wind speed</att>
                 <att name="standard_name">wind_speed_of_gust</att>
@@ -233,6 +243,7 @@
             <destinationName>WDIR_2</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Direction from which the wind is blowing (secondary sensor)</att>
                 <att name="standard_name">wind_from_direction</att>
@@ -244,6 +255,7 @@
             <destinationName>WSPD_2</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Wind speed (secondary sensor)</att>
                 <att name="standard_name">wind_speed</att>
@@ -255,6 +267,7 @@
             <destinationName>WSS_2</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Horizontal scalar wind speed (secondary sensor)</att>
                 <att name="standard_name">wind_speed</att>
@@ -266,6 +279,7 @@
             <destinationName>GSPD_2</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Wind</att>
                 <att name="long_name">Gust wind speed (secondary sensor)</att>
                 <att name="standard_name">wind_speed_of_gust</att>
@@ -277,6 +291,7 @@
             <destinationName>ATMS</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Pressure</att>
                 <att name="long_name">Atmospheric pressure at sea level</att>
                 <att name="standard_name">air_pressure_at_sea_level</att>
@@ -288,6 +303,7 @@
             <destinationName>ATMS_2</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Pressure</att>
                 <att name="long_name">Atmospheric pressure at sea level (secondary sensor)</att>
                 <att name="standard_name">air_pressure_at_sea_level</att>
@@ -299,6 +315,7 @@
             <destinationName>DRYT</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Temperature</att>
                 <att name="long_name">Dry bulb air temperature</att>
                 <att name="standard_name">air_temperature</att>
@@ -310,6 +327,7 @@
             <destinationName>SSTP</destinationName>
             <dataType>float</dataType>
             <addAttributes>
+                <att name="missing_value" type="float">10000.0</att>
                 <att name="ioos_category">Temperature</att>
                 <att name="long_name">Sea surface temperature</att>
                 <att name="standard_name">sea_surface_temperature</att>
