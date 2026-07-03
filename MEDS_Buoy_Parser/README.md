@@ -1,82 +1,46 @@
 # MEDS_Buoy_Parser
 
-Downloads the **non-real-time DFO MEDS buoy CSV archive**, fixes it up, and
-publishes it to the **CIOOS National ERDDAP** (the `cioos-national-erddap`
-submodule) as the `MEDS_CSV` dataset.
+Downloads the non-real-time DFO MEDS buoy CSV archive, fixes it up, and
+publishes it to the CIOOS National ERDDAP as the `MEDS_CSV` dataset. Batch
+counterpart to `ECCC_Buoy_Parser` in this repo — same conventions, daily
+schedule instead of AMQP. See the [root README](../README.md) for full stack
+setup and dataset-fragment generation.
 
-It is the batch counterpart to the event-driven `ECCC_Buoy_Parser` in this repo:
-same Prefect / uv / Docker conventions and the same `datasets.d/*.xml` +
-`erddap_sync` publishing path, but instead of an AMQP subscription it runs on a
-daily schedule and mirrors the MEDS `CSVDATA/` zip archive.
+## What it does (`app/flow.py`)
 
-## Pipeline
-
-```
-MEDS waveshare archive (HTTPS)
-  CSVDATA/*_csv.zip  +  INVENTORY/b_pw_inv.json
-        │
-        ▼
- meds_buoy_parser  (Prefect flow: download → fix → publish)
-        │  writes per-station CSVs
-        ▼
- cioos-national-erddap/datasets/MEDS_CSV/<STN_ID>.csv
-        │
- GenerateDatasetsXml_medsbuoys.sh ──► cioos-national-erddap/datasets.d/MEDS.xml
-        │
- erddap_sync (sync-erddap-datasets.py) merges datasets.d ──► datasets.xml
-        │
-        ▼
- erddap (CIOOS National) ──► :8080/erddap/tabledap/MEDS_CSV
-```
-
-### Stages (`app/flow.py`)
-
-1. **download** (`meds_download.py`) — list the MEDS `CSVDATA/` Apache index and
-   conditionally download each `*_csv.zip` (`If-Modified-Since`, i.e. `wget -N`
-   behaviour), extract to a work dir, then normalise headers: strip the trailing
-   comma and, for modern `C*` buoys, force the canonical 23-column header (the raw
-   files have `$` suffixes and duplicate secondary-sensor column names).
-2. **fix** (`meds_fix.py`) — convert dates to ISO 8601 UTC (dropping invalid ones
-   like `01/10/1988 00:84`), flip longitude to degrees east (keeping the raw
-   coordinate as `preciseLat`/`preciseLon`), set the fixed deployment lat/lon from
-   `b_pw_inv.json`, and reindex **every** buoy type to one unified column set so a
-   single ERDDAP dataset serves them all (historic `MEDS*`/`WEL*` buoys have empty
-   wind/pressure/temperature cells).
-3. **publish** — copy the fixed per-station CSVs into
-   `cioos-national-erddap/datasets/MEDS_CSV/`, which ERDDAP reads at `/datasets`.
+1. **download** (`meds_download.py`) — list MEDS's `CSVDATA/` index, download
+   any new/changed `*_csv.zip`, extract, normalise headers (canonical 23-column
+   header for `C*` buoys).
+2. **fix** (`meds_fix.py`) — ISO 8601 UTC dates, longitude flipped to degrees
+   east (raw values kept as `preciseLat`/`preciseLon`), fixed deployment
+   lat/lon from `b_pw_inv.json`, all buoy types reindexed to one unified
+   column set (historic buoys get empty wind/pressure/temperature cells).
+3. **publish** — write per-station CSVs to `datasets/MEDS_CSV/`.
 
 ## Scope
 
-All buoy families in the archive are published to the one `MEDS_CSV` dataset:
-
 | Prefix | Example | Variables |
 | --- | --- | --- |
-| `C*` | `C44131` | full wave + wind + pressure + air/sea temperature |
+| `C*` | `C44131` | wave + wind + pressure + air/sea temperature |
 | `MEDS*` | `MEDS210` | wave only |
 | `WEL*` | `WEL233` | wave only |
 
-## Configuration (environment variables)
+## Configuration
 
 | Var | Default | Purpose |
 | --- | --- | --- |
-| `MEDS_CRON` | `0 6 * * *` | Daily schedule for the served deployment. |
-| `MEDS_STATIONS` | *(all)* | Comma-separated station allowlist (e.g. `c46131,meds210`) for dev runs. |
-| `MEDS_RUN_NOW` | *(unset)* | If set, run the pipeline once and exit instead of serving. |
-| `MEDS_DATA_DIR` | `data` | Work dir for zips / extracted / fixed CSVs. |
-| `MEDS_DATASETS_DIR` | `datasets` | National ERDDAP datasets dir (mounted in Docker). |
-| `MEDS_DATASET_NAME` | `MEDS_CSV` | Dataset subfolder + ERDDAP datasetID. |
+| `MEDS_CRON` | `0 6 * * *` | Daily schedule |
+| `MEDS_STATIONS` | *(all)* | Comma-separated station allowlist, e.g. `c46131,meds210` |
+| `MEDS_RUN_NOW` | *(unset)* | Run once and exit instead of serving on a schedule |
+| `MEDS_DATA_DIR` | `data` | Work dir for zips / extracted / fixed CSVs |
+| `MEDS_DATASETS_DIR` | `datasets` | National ERDDAP datasets dir (mounted in Docker) |
+| `MEDS_DATASET_NAME` | `MEDS_CSV` | Dataset subfolder + ERDDAP datasetID |
 
-## Run it
+## Running it standalone
 
-Via the full stack (from the repo root):
-
-```sh
-docker compose up --build meds_buoy_parser
-```
-
-The container serves the `meds-daily` deployment on the Prefect server. On first
-boot there's no data until the cron fires — trigger a run immediately from the
-Prefect UI (<http://localhost:4200>), or run once locally:
+Via the stack: `docker compose up --build meds_buoy_parser` (registers the
+`meds-daily` deployment; trigger it manually from the Prefect UI, or run once
+locally without waiting for cron):
 
 ```sh
 cd MEDS_Buoy_Parser/app
@@ -86,26 +50,22 @@ MEDS_RUN_NOW=1 MEDS_STATIONS=c44131,meds210,wel233 \
   uv run python flow.py
 ```
 
-Then install the ERDDAP fragment and let `erddap_sync` merge it:
+Offline test (no network, uses `test/sample_csv`):
 
 ```sh
-./GenerateDatasetsXml_medsbuoys.sh          # installs datasets.d/MEDS.xml
-# pass --generate to also produce a fresh draft from ERDDAP's tool for review
-```
-
-### Offline test (no network)
-
-```sh
-cd MEDS_Buoy_Parser/app
-uv run python tests.py   # exercises normalise + fix against test/sample_csv
+uv run python tests.py
 ```
 
 ## ERDDAP dataset fragment
 
-`erddap_config/MEDS.xml` is the curated, reviewed dataset definition (its
-`sourceName`s are kept in lock-step with the columns `meds_fix.COLUMN_ORDER`
-writes). `GenerateDatasetsXml_medsbuoys.sh` installs it into the submodule's
-`datasets.d/`. If the column set ever changes, update `COLUMN_ORDER` and this
-fragment together (the `--generate` flag produces a draft to diff against).
+`erddap_config/MEDS.xml` is the curated, reviewed fragment — its
+`sourceName`s match `meds_fix.COLUMN_ORDER` exactly, and it includes the
+`Q_FLAG` comment block and `missing_value` markers for the `10000` sentinel
+used in raw numeric fields. `../GenerateDatasetsXml_medsbuoys.sh` installs it
+into the submodule's `datasets.d/`.
+
+If `COLUMN_ORDER` ever changes, update it and this fragment together. Pass
+`--generate` to the script to produce a fresh draft from ERDDAP's own tool
+(`logs/MEDS.draft.xml`) to diff against — it is not installed automatically.
 
 Python 3.12, packaged with `uv` (`uv.lock` committed).
