@@ -25,7 +25,11 @@ mkdir -p "$OUT_DIR"
 
 if [[ "${1:-}" == "--generate" ]]; then
   mkdir -p "$LOGS_DIR"
+  # ERDDAP's EDStatic startup aborts unless flagKeyKey is non-default; any local
+  # value works for generating a fragment (override via the environment).
+  ERDDAP_flagKeyKey="${ERDDAP_flagKeyKey:-generate-datasets-xml-local}"
   docker run --rm \
+    -e ERDDAP_flagKeyKey="$ERDDAP_flagKeyKey" \
     -v "$DATASETS_DIR:/datasets" \
     -v "$LOGS_DIR:/erddapData/logs" \
     -v "$SUBMODULE/erddap/content:/usr/local/tomcat/content/erddap" \

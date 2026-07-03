@@ -12,7 +12,13 @@ LOGS_DIR="$ROOT/logs"
 
 mkdir -p "$OUT_DIR" "$LOGS_DIR"
 
+# ERDDAP's EDStatic startup (which GenerateDatasetsXml triggers) aborts unless
+# flagKeyKey is set to a non-default value. Any local value works for generating
+# a fragment; override via the environment to reuse the stack's key if desired.
+ERDDAP_flagKeyKey="${ERDDAP_flagKeyKey:-generate-datasets-xml-local}"
+
 docker run --rm \
+  -e ERDDAP_flagKeyKey="$ERDDAP_flagKeyKey" \
   -v "$DATASETS_DIR:/datasets" \
   -v "$LOGS_DIR:/erddapData/logs" \
   -v "$SUBMODULE/erddap/content:/usr/local/tomcat/content/erddap" \
