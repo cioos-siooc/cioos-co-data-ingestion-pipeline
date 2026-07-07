@@ -65,6 +65,28 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Argo Canada pipeline: a scheduled Prefect flow that mirrors the MEDS DAC's
+  # aggregated <WMO>_prof.nc files from the Argo GDAC into the national ERDDAP
+  # datasets dir (served as ARGO_MEDS). Demo default mirrors only the first 10
+  # floats — set ARGO_FLOAT_LIMIT=0 for the full DAC (~900 floats, ~2 GB).
+  argo_meds_parser:
+    build:
+      context: ./Argo_MEDS_Parser
+      dockerfile: Dockerfile
+    volumes:
+      - ./cioos-national-erddap/datasets:/app/datasets
+      - ./Argo_MEDS_Parser/app/data:/app/data
+    environment:
+      - PREFECT_API_URL=http://prefect:4200/api
+      - ARGO_CRON=0 7 * * *
+      - ARGO_FLOAT_LIMIT=10
+      # - ARGO_FLOATS=4902674,4902530   # optional dev allowlist (overrides limit)
+      # - ARGO_GDAC_URL=https://usgodae.org/pub/outgoing/argo   # US GODAE mirror
+    depends_on:
+      prefect:
+        condition: service_healthy
+    restart: unless-stopped
+
   # One-shot: run the national ERDDAP sync (from the cioos-national-erddap
   # submodule). It harvests the regional CIOOS servers AND merges every
   # datasets.d/*.xml fragment (including the ECCC buoy fragment) into

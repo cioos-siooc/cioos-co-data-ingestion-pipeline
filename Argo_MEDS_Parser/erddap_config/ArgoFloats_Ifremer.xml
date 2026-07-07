@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DEMO VERSION 1 — federate Ifremer's global ArgoFloats dataset.
+
+  EDDTableFromErddap is a *redirect* mirror: data requests are handed off to the
+  remote ERDDAP, which answers the client directly. Consequences (per the ERDDAP
+  datasets.xml docs, https://erddap.github.io/docs/server-admin/datasets):
+
+  - GLOBAL SCOPE ONLY. There is no way to bake in a row filter such as
+    data_center="ME" (Canada/MEDS): this type supports no constraints, and no
+    ERDDAP dataset type can serve a fixed row-subset of a remote server
+    (defaultDataQuery only pre-fills the form; users can clear it). A
+    Canadian-only dataset requires owning the files - that is demo version 2
+    (ARGO_MEDS.xml + the Argo_MEDS_Parser pipeline).
+  - NO METADATA CONTROL. addAttributes / dataVariable sections are forbidden
+    for this type; title, summary, and cdm_data_type come from Ifremer as-is.
+  - NOT CDE-HARVESTABLE. Ifremer advertises cdm_data_type=TrajectoryProfile,
+    which the CIOOS Data Explorer harvester (cde_harvester) skips
+    (CDM_DATA_TYPE_UNSUPPORTED). This fragment is a catalogue/federation demo
+    and a convenience link to the global dataset on the national server.
+  - AVAILABILITY is Ifremer's: their ERDDAP has been observed to be slow or
+    time out; requests redirect there, so this dataset is only as fast as they are.
+  - Kept in sync via ERDDAP's subscription system (this server subscribes to
+    the remote dataset's change notifications automatically).
+
+  Installed into cioos-national-erddap/datasets.d/ by
+  GenerateDatasetsXml_argofederated.sh. Deliberately NOT added via
+  erddap_servers.yaml - that would harvest Ifremer's entire catalogue and the
+  entry would be subject to the sync's stale-harvest cleanup.
+
+  Clients CAN of course apply the Canada filter per-request, e.g.:
+    .../tabledap/ArgoFloats_Ifremer.csv?...&data_center=%22ME%22
+-->
+<erddapDatasets>
+
+    <dataset type="EDDTableFromErddap" datasetID="ArgoFloats_Ifremer" active="true">
+        <sourceUrl>https://erddap.ifremer.fr/erddap/tabledap/ArgoFloats</sourceUrl>
+    </dataset>
+
+</erddapDatasets>

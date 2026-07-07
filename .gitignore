@@ -22,3 +22,9 @@ logs/
 MEDS_Buoy_Parser/app/data/
 !MEDS_Buoy_Parser/erddap_config/MEDS.xml
 !MEDS_Buoy_Parser/app/test/sample_csv/*.csv
+
+# Argo MEDS parser: keep the curated ERDDAP fragments, ignore the runtime work
+# dir (mirrored NetCDF). The test fixture is HTML (not covered by the ignores).
+Argo_MEDS_Parser/app/data/
+!Argo_MEDS_Parser/erddap_config/ARGO_MEDS.xml
+!Argo_MEDS_Parser/erddap_config/ArgoFloats_Ifremer.xml

@@ -1,0 +1,10 @@
+[project]
+name = "argo-meds-parser"
+version = "0.1.0"
+description = "Mirror Argo Canada (MEDS DAC) profile NetCDF from the GDAC and publish to the CIOOS National ERDDAP"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "prefect>=3.4.22",
+    "requests>=2.32.5",
+]
