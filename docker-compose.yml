@@ -35,6 +35,7 @@ services:
       - ./data/eccc:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
+      - PUBLISH_URL=file:///app/datasets
     depends_on:
       prefect:
         condition: service_healthy
@@ -53,6 +54,7 @@ services:
       - ./data/meds:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
+      - PUBLISH_URL=file:///app/datasets
       - MEDS_CRON=0 6 * * *
       # - MEDS_STATIONS=c46131,meds210,wel233   # optional dev allowlist
     depends_on:
@@ -73,6 +75,7 @@ services:
       - ./data/argo:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
+      - PUBLISH_URL=file:///app/datasets
       - ARGO_CRON=0 7 * * *
       - ARGO_FLOAT_LIMIT=10
       # - ARGO_FLOATS=4902674,4902530   # optional dev allowlist (overrides limit)

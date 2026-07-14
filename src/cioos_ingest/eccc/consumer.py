@@ -14,6 +14,7 @@ import socket
 import uuid
 from pathlib import Path
 from cioos_ingest.eccc.swob_parser import Marine_buoy_parser
+from cioos_ingest.publish import publish_files
 from prefect.logging import get_run_logger
 from prefect import flow, task
 from prefect.cache_policies import NO_CACHE
@@ -141,13 +142,24 @@ class SarraceniaStyleAMQP:
     @task(name="parse-marine-xml", task_run_name="parse-{file_path.name}", cache_policy=NO_CACHE)
     def parse_file(self, file_path):
         logger = get_run_logger()
-        """Parse downloaded XML file"""
+        """Parse downloaded XML file and publish the touched station CSV"""
         try:
             result = self.parser.parse_marine_xml(file_path)
-            self.parser.toCSV()
-            
+            if result is None:
+                logger.error(f"❌ Parse failed: {file_path.name}")
+                return
+            csv_path = self.parser.toCSV()
+
             logger.info(f"✅ Parsed: {file_path.name}")
-                
+
+            # Whole-file copy per message is cheap locally (per-station CSVs);
+            # note that a remote PUBLISH_URL re-uploads the full station file
+            # on every message.
+            if csv_path:
+                publish_files([Path(csv_path)],
+                              os.environ.get("ECCC_DATASET_NAME", "ECCCbuoys"),
+                              pipeline="eccc", logger=logger)
+
         except Exception as e:
             logger.error(f"❌ Parse error {file_path}: {e}")
     @flow(name="process-marine-message", flow_run_name="process-{filename}")

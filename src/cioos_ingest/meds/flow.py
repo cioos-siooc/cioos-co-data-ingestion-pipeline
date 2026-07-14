@@ -3,13 +3,14 @@
 Prefect entrypoint for the MEDS buoy pipeline.
 
 Unlike the event-driven ECCC parser, MEDS bulk CSVs are non-real-time, so this is
-a scheduled batch flow: download (conditional) -> fix -> publish into the national
-ERDDAP's shared datasets dir. ``main()`` serves the flow on a daily cron so the
+a scheduled batch flow: download (conditional) -> fix -> publish to the PUBLISH_URL
+destination (default: the local datasets dir ERDDAP serves; see cioos_ingest.publish
+for s3://, sftp://, ...). ``main()`` serves the flow on a daily cron so the
 container stays alive as a Prefect deployment; set ``MEDS_RUN_NOW=1`` to run once
 and exit (useful for local testing / CI).
 
 Paths default to the in-container mounts (see docker-compose.yml) but fall back to
-repo-relative dirs so ``uv run python flow.py`` works from ``app/`` locally too.
+repo-relative dirs so a local ``uv run cioos-ingest meds`` works too.
 """
 
 import os
@@ -22,17 +23,16 @@ from prefect.logging import get_run_logger
 
 from cioos_ingest.meds import download as meds_download
 from cioos_ingest.meds import fix as meds_fix
+from cioos_ingest.publish import publish_files
 
 # --- configuration (env-overridable) ---------------------------------------
 DATA_DIR = Path(os.environ.get("MEDS_DATA_DIR", "data"))
-DATASETS_DIR = Path(os.environ.get("MEDS_DATASETS_DIR", "datasets"))
 DATASET_NAME = os.environ.get("MEDS_DATASET_NAME", "MEDS_CSV")
 CRON = os.environ.get("MEDS_CRON", "0 6 * * *")  # daily at 06:00
 
 ZIP_DIR = DATA_DIR / "zip"
 CSV_DIR = DATA_DIR / "csv"
 FIXED_DIR = DATA_DIR / "csv-fixed"
-PUBLISH_DIR = DATASETS_DIR / DATASET_NAME
 
 
 def _stations_from_env():
@@ -62,13 +62,8 @@ def fix():
 @task(name="publish-to-erddap", cache_policy=NO_CACHE)
 def publish():
     logger = get_run_logger()
-    PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
-    count = 0
-    for src in sorted(FIXED_DIR.glob("*.csv")):
-        shutil.copy2(src, PUBLISH_DIR / src.name)
-        count += 1
-    logger.info(f"📤 published {count} CSV(s) to {PUBLISH_DIR}")
-    return count
+    return publish_files(sorted(FIXED_DIR.glob("*.csv")), DATASET_NAME,
+                         pipeline="meds", logger=logger)
 
 
 @flow(name="meds-buoy-pipeline")

@@ -4,20 +4,19 @@ Prefect entrypoint for the Argo Canada (MEDS GDAC) pipeline.
 
 Scheduled batch flow, same shape as the MEDS buoy pipeline: mirror the
 aggregated ``<WMO>_prof.nc`` files from the GDAC's ``dac/meds/`` tree, then
-publish them into the national ERDDAP's shared datasets dir, where the
-ARGO_MEDS dataset (EDDTableFromMultidimNcFiles) serves them. ``main()`` serves
+publish them to the PUBLISH_URL destination (default: the local datasets dir
+ERDDAP serves as ARGO_MEDS, EDDTableFromMultidimNcFiles). ``main()`` serves
 the flow on a daily cron; set ``ARGO_RUN_NOW=1`` to run once and exit.
 
 No fix step is needed: the GDAC NetCDF is already CF-compliant Argo format —
 all reshaping for CIOOS/CDE happens in the ERDDAP fragment's addAttributes
-(see ../erddap_config/ARGO_MEDS.xml).
+(see datasets.d/ARGO_MEDS.xml).
 
 Paths default to the in-container mounts (see docker-compose.yml) but fall back
-to repo-relative dirs so ``uv run python flow.py`` works from ``app/`` locally.
+to repo-relative dirs so a local ``uv run cioos-ingest argo`` works too.
 """
 
 import os
-import shutil
 from pathlib import Path
 
 from prefect import flow, task
@@ -25,16 +24,15 @@ from prefect.cache_policies import NO_CACHE
 from prefect.logging import get_run_logger
 
 from cioos_ingest.argo import download as argo_download
+from cioos_ingest.publish import publish_files
 
 # --- configuration (env-overridable) ----------------------------------------
 DATA_DIR = Path(os.environ.get("ARGO_DATA_DIR", "data"))
-DATASETS_DIR = Path(os.environ.get("ARGO_DATASETS_DIR", "datasets"))
 DATASET_NAME = os.environ.get("ARGO_DATASET_NAME", "ARGO_MEDS")
 CRON = os.environ.get("ARGO_CRON", "0 7 * * *")  # daily at 07:00
 GDAC_URL = os.environ.get("ARGO_GDAC_URL", argo_download.GDAC_URL)
 
 NC_DIR = DATA_DIR / "nc"
-PUBLISH_DIR = DATASETS_DIR / DATASET_NAME
 
 # Demo default: 10 floats. Set ARGO_FLOAT_LIMIT=0 to mirror the whole MEDS DAC
 # (~900 floats, several GB); ARGO_FLOATS takes precedence over the limit.
@@ -68,17 +66,10 @@ def download(wanted=None, limit=None):
 @task(name="publish-to-erddap", cache_policy=NO_CACHE)
 def publish():
     logger = get_run_logger()
-    PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
-    count = 0
-    for src in sorted(NC_DIR.glob("*_prof.nc")):
-        dest = PUBLISH_DIR / src.name
-        # copy2 keeps mtimes so ERDDAP's updateEveryNMillis change-detection and
-        # the next run's If-Modified-Since both keep working.
-        if not dest.exists() or dest.stat().st_mtime != src.stat().st_mtime:
-            shutil.copy2(src, dest)
-        count += 1
-    logger.info(f"📤 published {count} profile file(s) to {PUBLISH_DIR}")
-    return count
+    # skip_unchanged keeps the mtime-based "only copy what the GDAC actually
+    # updated" behaviour ERDDAP's change detection relies on.
+    return publish_files(sorted(NC_DIR.glob("*_prof.nc")), DATASET_NAME,
+                         pipeline="argo", skip_unchanged=True, logger=logger)
 
 
 @flow(name="argo-meds-pipeline")

@@ -22,10 +22,11 @@ class Marine_buoy_parser:
     
     def __init__(self):
         self.data={}
-        datasets_dir = os.environ.get("ECCC_DATASETS_DIR", "datasets")
-        dataset_name = os.environ.get("ECCC_DATASET_NAME", "ECCCbuoys")
+        # NCCSV is staged locally; the consumer publishes each touched station
+        # file to the PUBLISH_URL destination (see cioos_ingest.publish).
+        data_dir = os.environ.get("ECCC_DATA_DIR", "data")
         config_dir = os.environ.get("ECCC_CONFIG_DIR", "config")
-        self.csvFolder = os.path.join(datasets_dir, dataset_name)
+        self.csvFolder = os.path.join(data_dir, "nccsv")
         self.mappingFile = os.path.join(config_dir, "ECCCbuoys_json_fields.json")
         self.typesFile = os.path.join(config_dir, "ECCCbuoys_types.json")
     
@@ -212,9 +213,8 @@ class Marine_buoy_parser:
         wmo_synop_id = self.data['metadata']['wmo_synop_id']['value']
         if wmo_synop_id not in mapping:
             mapping = self.updateMappingFile()
-        csvFile = wmo_synop_id + ".csv"
-        csvFile = os.path.join(self.csvFolder, csvFile)
-        if not os.path.isfile(csvFile):
+        csv_path = os.path.join(self.csvFolder, wmo_synop_id + ".csv")
+        if not os.path.isfile(csv_path):
             self.createCSVHeader()
             
         for field in self.data["observations"]:
@@ -252,9 +252,10 @@ class Marine_buoy_parser:
                 print(f"Warning: qualifier 'data_flag' not found in '{field}'")
                 data.append('')
                 
-        with open(csvFile, 'a') as csvFile:
-            writer = csv.writer(csvFile)
+        with open(csv_path, 'a') as fh:
+            writer = csv.writer(fh)
             writer.writerow(data)
+        return csv_path
         """
 
         if not os.path.exists(self.csvFile):
