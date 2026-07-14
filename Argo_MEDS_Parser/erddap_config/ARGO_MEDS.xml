@@ -13,15 +13,14 @@
   (N_PROF x N_LEVELS); EDDTableFromMultidimNcFiles flattens them to one row per
   (profile, level) and removeMVRows drops the fill-padded levels.
 
-  DELIBERATE RESHAPE FOR CIOOS/CDE: Argo's natural cdm_data_type is
-  TrajectoryProfile, but the CIOOS Data Explorer harvester (cde_harvester,
-  explore-cioos repo) skips Trajectory/TrajectoryProfile datasets
-  (CDM_DATA_TYPE_UNSUPPORTED). We therefore advertise TimeSeriesProfile:
-  each float (platform_number, cf_role=timeseries_id) is a "timeseries" of
-  per-cycle profiles (cycle_number, cf_role=profile_id). Every cycle has its
-  own lat/lon, so CDE's distinct(id, lat, lon) profile extraction yields one
-  point per cycle - correct for Argo. Revisit if/when CDE gains real
-  TrajectoryProfile support.
+  NATIVE TrajectoryProfile: each float (platform_number, cf_role=trajectory_id)
+  is a trajectory of per-cycle profiles (cycle_number, cf_role=profile_id).
+  Previously this advertised TimeSeriesProfile instead, because the CIOOS Data
+  Explorer harvester (cde_harvester, explore-cioos repo) skipped
+  Trajectory/TrajectoryProfile datasets (CDM_DATA_TYPE_UNSUPPORTED). That
+  reshape is no longer needed now that cde_harvester supports
+  Trajectory/TrajectoryProfile natively (explore-cioos branch
+  feat/m2-trajectory-datasets).
 
   Other notable choices:
   - PSAL's standard_name is overridden to sea_water_practical_salinity (the
@@ -51,8 +50,8 @@
         <fileTableInMemory>false</fileTableInMemory>
         <accessibleViaFiles>true</accessibleViaFiles>
         <addAttributes>
-            <att name="cdm_data_type">TimeSeriesProfile</att>
-            <att name="cdm_timeseries_variables">platform_number</att>
+            <att name="cdm_data_type">TrajectoryProfile</att>
+            <att name="cdm_trajectory_variables">platform_number</att>
             <att name="cdm_profile_variables">cycle_number, time, latitude, longitude, direction, data_mode</att>
             <!-- Argo's vertical coordinate is pressure (decibar), not depth/altitude.
                  ERDDAP requires profile-type datasets to name a vertical proxy when no
@@ -71,7 +70,7 @@
             <att name="source">Argo float profiles, Argo GDAC dac/meds aggregated _prof.nc files</att>
             <att name="sourceUrl">https://data-argo.ifremer.fr/dac/meds/</att>
             <att name="standard_name_vocabulary">CF Standard Name Table v55</att>
-            <att name="summary">Vertical profiles of in-situ temperature, practical salinity and pressure from Argo profiling floats operated by Argo Canada (DFO Marine Environmental Data Section, MEDS - Argo data-centre code "ME"). Mirrored from the aggregated per-float profile files (WMO_prof.nc) in the dac/meds tree of the Argo Global Data Assembly Centre, so both real-time (data_mode=R/A) and delayed-mode QC'd (data_mode=D) cycles are included, along with adjusted values and per-level QC flags. One row per (cycle, level); each float is presented as a time series of per-cycle profiles.</att>
+            <att name="summary">Vertical profiles of in-situ temperature, practical salinity and pressure from Argo profiling floats operated by Argo Canada (DFO Marine Environmental Data Section, MEDS - Argo data-centre code "ME"). Mirrored from the aggregated per-float profile files (WMO_prof.nc) in the dac/meds tree of the Argo Global Data Assembly Centre, so both real-time (data_mode=R/A) and delayed-mode QC'd (data_mode=D) cycles are included, along with adjusted values and per-level QC flags. One row per (cycle, level); each float is presented as a trajectory of per-cycle profiles.</att>
             <att name="title">Argo Canada profiling float profiles (MEDS DAC, GDAC mirror)</att>
         </addAttributes>
 
@@ -80,7 +79,7 @@
             <destinationName>platform_number</destinationName>
             <dataType>String</dataType>
             <addAttributes>
-                <att name="cf_role">timeseries_id</att>
+                <att name="cf_role">trajectory_id</att>
                 <att name="ioos_category">Identifier</att>
                 <att name="long_name">Float WMO identifier</att>
             </addAttributes>
