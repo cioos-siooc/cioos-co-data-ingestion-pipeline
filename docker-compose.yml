@@ -1,13 +1,3 @@
-# The ERDDAP service itself is not defined here — it is pulled in from the
-# cioos-national-erddap submodule's own docker-compose.yml via `include`.
-# `include` rebases that file's relative paths (./erddap/content, ./datasets,
-# ./datasets.d, ./.env) onto the submodule directory, which is exactly where
-# this stack writes buoy NCCSV, drops the datasets.d fragment, and runs the
-# sync — so everything lines up without redefining the service here.
-include:
-  - path: cioos-national-erddap/docker-compose.yml
-    env_file: cioos-national-erddap/.env
-
 services:
   prefect:
     image: prefecthq/prefect:3-latest
@@ -38,9 +28,9 @@ services:
     image: cioos-ingest:local
     command: ["cioos-ingest", "eccc"]
     volumes:
-      # Buoy NCCSV files are written into the national ERDDAP submodule's shared
-      # datasets dir, which the (included) erddap service reads at /datasets.
-      - ./cioos-national-erddap/datasets:/app/datasets
+      # Buoy NCCSV files are written into the shared datasets dir, which the
+      # erddap service reads at /datasets.
+      - ./datasets:/app/datasets
       - ./config/eccc:/app/config
       - ./data/eccc:/app/data
     environment:
@@ -59,7 +49,7 @@ services:
     image: cioos-ingest:local
     command: ["cioos-ingest", "meds"]
     volumes:
-      - ./cioos-national-erddap/datasets:/app/datasets
+      - ./datasets:/app/datasets
       - ./data/meds:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
@@ -79,7 +69,7 @@ services:
     image: cioos-ingest:local
     command: ["cioos-ingest", "argo"]
     volumes:
-      - ./cioos-national-erddap/datasets:/app/datasets
+      - ./datasets:/app/datasets
       - ./data/argo:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
@@ -92,28 +82,24 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # One-shot: run the national ERDDAP sync (from the cioos-national-erddap
-  # submodule). It harvests the regional CIOOS servers AND merges every
-  # datasets.d/*.xml fragment (including the ECCC buoy fragment) into
-  # erddap/content/datasets.xml, then exits. erddap waits for it to finish.
-  erddap_sync:
-    image: ghcr.io/astral-sh/uv:python3.12-bookworm
-    working_dir: /work
-    volumes:
-      - ./cioos-national-erddap:/work
-    environment:
-      # Keep uv's venv/cache out of the (git-tracked) submodule working tree.
-      UV_PROJECT_ENVIRONMENT: /venv
-      UV_CACHE_DIR: /uvcache
-    command: ["uv", "run", "sync-erddap-datasets.py"]
-    restart: "no"
-
-  # erddap is defined in the included submodule compose; only add the ordering
-  # so it starts after the one-shot sync has merged datasets.xml.
+  # Local ERDDAP instance for developing and testing the datasets produced by
+  # the pipelines — production ERDDAP deployment is managed elsewhere. The
+  # axiom image's entrypoint assembles erddap/content/datasets.xml from the
+  # committed ./datasets.d/*.xml fragments at container start, so fragment
+  # edits take effect on `docker compose restart erddap`.
   erddap:
-    depends_on:
-      erddap_sync:
-        condition: service_completed_successfully
+    image: axiom/docker-erddap:v2.28.1
+    ports:
+      - "${ERDDAP_PORT:-8080}:8080"
+    environment:
+      ERDDAP_flagKeyKey: ${ERDDAP_flagKeyKey:?set in .env (see .env.example)}
+    volumes:
+      - ./erddap/conf/robots.txt:/usr/local/tomcat/webapps/ROOT/robots.txt
+      - ./erddap/content:/usr/local/tomcat/content/erddap
+      - ./erddap/data:/erddapData
+      - ./datasets:/datasets
+      - ./datasets.d:/datasets.d
+    restart: unless-stopped
 
 volumes:
   prefect_data:
