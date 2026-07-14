@@ -6,13 +6,14 @@ Based on analysis of Sarracenia source code
 
 import pika
 import json
+import os
 import ssl
 #import logging
 import requests
 import socket
 import uuid
 from pathlib import Path
-from marine_buoy_parser import Marine_buoy_parser
+from cioos_ingest.eccc.swob_parser import Marine_buoy_parser
 from prefect.logging import get_run_logger
 from prefect import flow, task
 from prefect.cache_policies import NO_CACHE
@@ -41,7 +42,8 @@ class SarraceniaStyleAMQP:
         self.connection = None
         self.channel = None
         self.parser = Marine_buoy_parser()
-        self.download_dir = Path("data/marine_buoys/xml")
+        data_dir = Path(os.environ.get("ECCC_DATA_DIR", "data"))
+        self.download_dir = data_dir / "marine_buoys" / "xml"
         self.download_dir.mkdir(parents=True, exist_ok=True)
         
         # Generate persistent Sarracenia-style queue name

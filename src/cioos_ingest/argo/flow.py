@@ -24,7 +24,7 @@ from prefect import flow, task
 from prefect.cache_policies import NO_CACHE
 from prefect.logging import get_run_logger
 
-import argo_download
+from cioos_ingest.argo import download as argo_download
 
 # --- configuration (env-overridable) ----------------------------------------
 DATA_DIR = Path(os.environ.get("ARGO_DATA_DIR", "data"))
@@ -97,8 +97,8 @@ def argo_pipeline():
     return published
 
 
-def main():
-    if os.environ.get("ARGO_RUN_NOW"):
+def main(run_now=False):
+    if run_now or os.environ.get("ARGO_RUN_NOW"):
         argo_pipeline()
         return
     # Register a daily deployment and keep the container alive. The first run

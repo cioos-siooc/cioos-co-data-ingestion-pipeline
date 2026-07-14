@@ -20,8 +20,8 @@ from prefect import flow, task
 from prefect.cache_policies import NO_CACHE
 from prefect.logging import get_run_logger
 
-import meds_download
-import meds_fix
+from cioos_ingest.meds import download as meds_download
+from cioos_ingest.meds import fix as meds_fix
 
 # --- configuration (env-overridable) ---------------------------------------
 DATA_DIR = Path(os.environ.get("MEDS_DATA_DIR", "data"))
@@ -85,8 +85,8 @@ def meds_pipeline():
     return published
 
 
-def main():
-    if os.environ.get("MEDS_RUN_NOW"):
+def main(run_now=False):
+    if run_now or os.environ.get("MEDS_RUN_NOW"):
         meds_pipeline()
         return
     # Register a daily deployment and keep the container alive. The first run

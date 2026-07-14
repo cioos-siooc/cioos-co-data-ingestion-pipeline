@@ -28,16 +28,21 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # All three pipelines run from the same image (built once from the root
+  # Dockerfile); the per-service `command:` picks the pipeline via the CLI.
+
+  # Real-time ECCC buoy pipeline: long-running AMQP consumer of the MSC Datamart
+  # SWOB-ML marine feed, appending NCCSV rows per station.
   eccc_buoy_parser:
-    build:
-      context: ./ECCC_Buoy_Parser
-      dockerfile: Dockerfile
+    build: .
+    image: cioos-ingest:local
+    command: ["cioos-ingest", "eccc"]
     volumes:
       # Buoy NCCSV files are written into the national ERDDAP submodule's shared
       # datasets dir, which the (included) erddap service reads at /datasets.
       - ./cioos-national-erddap/datasets:/app/datasets
-      - ./ECCC_Buoy_Parser/app/config:/app/config
-      - ./ECCC_Buoy_Parser/app/data:/app/data
+      - ./config/eccc:/app/config
+      - ./data/eccc:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
     depends_on:
@@ -50,12 +55,12 @@ services:
   # ERDDAP datasets dir. Served on a daily cron (see MEDS_CRON); trigger a run
   # from the Prefect UI to populate immediately on first boot.
   meds_buoy_parser:
-    build:
-      context: ./MEDS_Buoy_Parser
-      dockerfile: Dockerfile
+    build: .
+    image: cioos-ingest:local
+    command: ["cioos-ingest", "meds"]
     volumes:
       - ./cioos-national-erddap/datasets:/app/datasets
-      - ./MEDS_Buoy_Parser/app/data:/app/data
+      - ./data/meds:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
       - MEDS_CRON=0 6 * * *
@@ -70,12 +75,12 @@ services:
   # datasets dir (served as ARGO_MEDS). Demo default mirrors only the first 10
   # floats — set ARGO_FLOAT_LIMIT=0 for the full DAC (~900 floats, ~2 GB).
   argo_meds_parser:
-    build:
-      context: ./Argo_MEDS_Parser
-      dockerfile: Dockerfile
+    build: .
+    image: cioos-ingest:local
+    command: ["cioos-ingest", "argo"]
     volumes:
       - ./cioos-national-erddap/datasets:/app/datasets
-      - ./Argo_MEDS_Parser/app/data:/app/data
+      - ./data/argo:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
       - ARGO_CRON=0 7 * * *

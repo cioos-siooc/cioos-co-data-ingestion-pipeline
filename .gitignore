@@ -17,14 +17,12 @@ logs/
 !robots.txt
 *.bak
 
-# MEDS buoy parser: keep the curated ERDDAP fragment and test fixtures,
-# ignore runtime work dirs (downloaded zips / extracted / fixed CSVs).
-MEDS_Buoy_Parser/app/data/
-!MEDS_Buoy_Parser/erddap_config/MEDS.xml
-!MEDS_Buoy_Parser/app/test/sample_csv/*.csv
+# Per-pipeline runtime work dirs (downloaded zips / extracted CSVs / mirrored
+# NetCDF / SWOB XML) — everything under data/ is regenerable.
+data/
 
-# Argo MEDS parser: keep the curated ERDDAP fragments, ignore the runtime work
-# dir (mirrored NetCDF). The test fixture is HTML (not covered by the ignores).
-Argo_MEDS_Parser/app/data/
+# Keep the curated ERDDAP fragments and test fixtures.
+!MEDS_Buoy_Parser/erddap_config/MEDS.xml
 !Argo_MEDS_Parser/erddap_config/ARGO_MEDS.xml
 !Argo_MEDS_Parser/erddap_config/ArgoFloats_Ifremer.xml
+!tests/fixtures/meds/sample_csv/*.csv

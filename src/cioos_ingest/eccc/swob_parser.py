@@ -22,9 +22,12 @@ class Marine_buoy_parser:
     
     def __init__(self):
         self.data={}
-        self.csvFolder = "./datasets/ECCCbuoys/"
-        self.mappingFile ="./config/ECCCbuoys_json_fields.json"
-        self.typesFile = "./config/ECCCbuoys_types.json"
+        datasets_dir = os.environ.get("ECCC_DATASETS_DIR", "datasets")
+        dataset_name = os.environ.get("ECCC_DATASET_NAME", "ECCCbuoys")
+        config_dir = os.environ.get("ECCC_CONFIG_DIR", "config")
+        self.csvFolder = os.path.join(datasets_dir, dataset_name)
+        self.mappingFile = os.path.join(config_dir, "ECCCbuoys_json_fields.json")
+        self.typesFile = os.path.join(config_dir, "ECCCbuoys_types.json")
     
     def getBuoyId(self):
         return self.data['metadata']['wmo_synop_id']['value']

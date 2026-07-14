@@ -1,34 +1,25 @@
 #!/usr/bin/env python3
 """
-Offline driver (not a pytest suite) — exercises header normalisation + the data
-fix against the committed sample CSVs without hitting the network.
+Offline tests — exercise header normalisation + the data fix against the
+committed sample CSVs without hitting the network.
 
-    cd MEDS_Buoy_Parser/app
-    uv run python tests.py
-
-It copies test/sample_csv into a temp dir, runs meds_download.normalize_headers
-and meds_fix.fix_all (with fake deployment metadata), and asserts the output has
-the unified column set, negative longitudes, ISO dates, and empty met columns for
-the historic buoys.
+Fake deployment metadata stands in for the MEDS inventory JSON (b_pw_inv.json).
+In production every station has a deployment record; MEDS210 in particular
+carries multiple in-file coordinates and so *requires* a fixed deployment coord.
 """
 
 import shutil
-import tempfile
 from pathlib import Path
 
 import pandas as pd
 
-import meds_download
-import meds_fix
+from cioos_ingest.meds import download as meds_download
+from cioos_ingest.meds import fix as meds_fix
 
-HERE = Path(__file__).parent
-SAMPLES = HERE / "test" / "sample_csv"
+SAMPLES = Path(__file__).parent / "fixtures" / "meds" / "sample_csv"
 
 
 def _fake_metadata():
-    # Stand in for the MEDS inventory JSON (b_pw_inv.json). In production every
-    # station has a deployment record; MEDS210 in particular carries multiple
-    # in-file coordinates and so *requires* a fixed deployment coord.
     df = pd.DataFrame(
         [
             {"station": "C44131", "lat": 45.9, "lon": -51.0},
@@ -39,16 +30,14 @@ def _fake_metadata():
     return df
 
 
-def main():
-    tmp = Path(tempfile.mkdtemp(prefix="meds-test-"))
-    csv_dir = tmp / "csv"
-    out_dir = tmp / "csv-fixed"
+def test_normalize_and_fix(tmp_path):
+    csv_dir = tmp_path / "csv"
+    out_dir = tmp_path / "csv-fixed"
     shutil.copytree(SAMPLES, csv_dir)
 
     meds_download.normalize_headers(csv_dir)
     meds_fix.fix_all(csv_dir, out_dir, df_metadata=_fake_metadata())
 
-    # --- assertions ---
     c = pd.read_csv(out_dir / "C44131.csv")
     assert list(c.columns) == meds_fix.COLUMN_ORDER, c.columns.tolist()
     assert (c["LONGITUDE"] < 0).all(), "C longitudes should be negative (degrees east)"
@@ -63,12 +52,3 @@ def main():
 
     w = pd.read_csv(out_dir / "WEL233.csv")
     assert list(w.columns) == meds_fix.COLUMN_ORDER
-
-    print("outputs:", sorted(p.name for p in out_dir.glob("*.csv")))
-    print(f"C44131 rows={len(c)}  MEDS210 rows={len(m)}  WEL233 rows={len(w)}")
-    print("✅ all assertions passed")
-    shutil.rmtree(tmp)
-
-
-if __name__ == "__main__":
-    main()
