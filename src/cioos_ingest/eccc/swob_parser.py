@@ -7,14 +7,42 @@ import os
 import json
 import csv
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from datetime import datetime
 import logging
-import re
-import traceback
-import pprint
 
 logger = logging.getLogger(__name__)
+
+
+def validate_nccsv_header(path):
+    """Check that a station NCCSV file has a complete metadata header.
+
+    ERDDAP rejects a file whose columns lack units/*DATA_TYPE* rows, and once
+    a bad header is written every append compounds the loss (issue #5), so
+    this is checked after header creation and again before publishing.
+    Returns (True, "") or (False, reason).
+    """
+    with open(path, 'r', newline='') as fh:
+        reader = csv.reader(fh)
+        meta_rows = []
+        columns = None
+        for row in reader:
+            if not row:
+                continue
+            if row[0] == '*END_METADATA*':
+                columns = next(reader, None)
+                break
+            meta_rows.append(row)
+        else:
+            return False, "no *END_METADATA* row"
+    if not columns:
+        return False, "no column-name row after *END_METADATA*"
+    with_units = {r[0] for r in meta_rows if len(r) >= 3 and r[1] == 'units'}
+    with_dtype = {r[0] for r in meta_rows if len(r) >= 3 and r[1] == '*DATA_TYPE*'}
+    missing = [c for c in columns if c not in with_units or c not in with_dtype]
+    if missing:
+        return False, f"columns missing units/*DATA_TYPE* rows: {', '.join(missing)}"
+    if 'time' not in columns:
+        return False, "no 'time' column (date_tm rename not applied)"
+    return True, ""
 
 
 class Marine_buoy_parser:
@@ -44,8 +72,7 @@ class Marine_buoy_parser:
             mapping[wmo_synop_id] = {}
             mapping[wmo_synop_id]["metadata"] = ['date_tm', 'lat', 'long', 'stn_typ', 'wmo_synop_id', 'wmo_id_extnd', 'stn_nam', 'msc_id', 'stn_elev', 'rpt_typ']
             mapping[wmo_synop_id]["observations"]=list(self.data["observations"].keys())
-        
-        print(mapping)
+            logger.info(f"added station {wmo_synop_id} to {self.mappingFile}")
         # Ensure directory exists
         os.makedirs(os.path.dirname(self.mappingFile), exist_ok=True)
         with open(self.mappingFile, 'w') as f:
@@ -63,80 +90,49 @@ class Marine_buoy_parser:
             json.dump(mapping, f, indent=1)
     
     """
-    def addFieldType(self, field, fieldtype="float", unit="unitless"):
-        os.makedirs(os.path.dirname(self.typesFile), exist_ok=True)
-        if not os.path.isfile(self.typesFile):
-            types={}
-        else:
-            with open(self.typesFile, 'r') as f:
-                types = json.load(f)
-        types[field] = {}
-        types[field]['type']=fieldtype
-        types[field]['unit']=unit
-        print(types)
-        with open(self.typesFile, 'w') as f:
-            json.dump(types, f, indent=4)
-        
+    def getFieldType(self, types, field):
+        """Resolve a field's (fieldname, unit, type) from the curated types file.
+
+        Raises if the field has no usable entry: a header written without a
+        field's units/*DATA_TYPE* rows is unreadable by ERDDAP forever, so we
+        refuse to write the station file at all (see issue #5).
+        """
+        if field not in types:
+            raise RuntimeError(
+                f"field '{field}' has no entry in {self.typesFile}; "
+                "add it to the curated types file before this station can be written")
+        entry = types[field]
+        if 'unit' not in entry or 'type' not in entry:
+            raise RuntimeError(
+                f"field '{field}' in {self.typesFile} is missing 'unit' or 'type'")
+        return entry.get('rename', field), entry['unit'], entry['type']
+
     def createCSVHeader(self, write = True):
         types = self.getTypes()
-        # Ensure directory exists
         if not os.path.isfile(self.mappingFile):
-            self.createMappingFile()
-        
+            self.updateMappingFile()
+
         with open(self.mappingFile, 'r') as f:
             mapping = json.load(f)
         wmo_synop_id = self.getBuoyId()
-        fields =  [] 
+        fields =  []
         units = []
-        #units.append("date_tm,standard_name,time")
-
-
-
-        #mapping[wmo_synop_id]["metadata"].copy()
-        for field in mapping [wmo_synop_id]["metadata"]:
-            try:
-                if field not in types:
-                    self.addFieldType(field, unit = self.data['metadata'][field]['uom'])
-                if "rename" in types[field]:
-                    fieldname = types[field]['rename']
-                else:
-                    fieldname = field
-                fields.append(fieldname)
-            
-
-            
-
-
-                units.append(f"{fieldname},units,{types[field]['unit']}")
-                units.append(f"{fieldname},*DATA_TYPE*,{types[field]['type']}")
-
-            except:
-                print(f"Warning: metadata field '{field}' not found in metadata")
-                continue
+        for field in mapping[wmo_synop_id]["metadata"]:
+            fieldname, unit, fieldtype = self.getFieldType(types, field)
+            fields.append(fieldname)
+            units.append(f"{fieldname},units,{unit}")
+            units.append(f"{fieldname},*DATA_TYPE*,{fieldtype}")
         for field in mapping[wmo_synop_id]["observations"]:
-            try:
-                if field not in types:
-                    self.addFieldType(field, unit = self.data['observations'][field]['uom'])
-                if "rename" in types[field]:
-                    fieldname = types[field]['rename']
-                else:
-                    fieldname = field
-                fields.append(fieldname)
-                fields.append(fieldname+"_qa_summary")
-                fields.append(fieldname+"_data_flag")
-
-                #self.addFieldType(field+"_qa_summary", fieldtype = "int", unit = "unitless")
-                #self.addFieldType(field+"_data_flag", fieldtype = "int", unit = "unitless")
-            
-                units.append(f"{fieldname},units,{types[field]['unit']}")
-                units.append(f"{fieldname},*DATA_TYPE*,{types[field]['type']}")
-                units.append(f"{fieldname}_qa_summary,units,unitless")
-                units.append(f"{fieldname}_qa_summary,*DATA_TYPE*,int")
-                units.append(f"{fieldname}_data_flag,units,unitless")
-                units.append(f"{fieldname}_data_flag,*DATA_TYPE*,int")
-            except:
-                print(f"Warning: data field '{field}' not found in data")
-                continue
+            fieldname, unit, fieldtype = self.getFieldType(types, field)
+            fields.append(fieldname)
+            fields.append(fieldname+"_qa_summary")
+            fields.append(fieldname+"_data_flag")
+            units.append(f"{fieldname},units,{unit}")
+            units.append(f"{fieldname},*DATA_TYPE*,{fieldtype}")
+            units.append(f"{fieldname}_qa_summary,units,unitless")
+            units.append(f"{fieldname}_qa_summary,*DATA_TYPE*,int")
+            units.append(f"{fieldname}_data_flag,units,unitless")
+            units.append(f"{fieldname}_data_flag,*DATA_TYPE*,int")
         if write:
             csvFile = wmo_synop_id + ".csv"
             csvFile = os.path.join(self.csvFolder, csvFile)
@@ -200,13 +196,21 @@ class Marine_buoy_parser:
             return {}
             
     def getTypes(self):
-        if os.path.isfile(self.typesFile):
-            with open(self.typesFile, 'r') as f:
-                return json.load(f)
-        else:
-            return {}
-            
-            
+        # The types file is curated by hand (it carries the date_tm->time,
+        # lat->latitude, long->longitude renames the ERDDAP dataset fragment
+        # depends on); it can never be reconstructed from live SWOB metadata,
+        # so its absence is a fatal configuration error (issue #5).
+        if not os.path.isfile(self.typesFile):
+            raise RuntimeError(
+                f"types file {self.typesFile} is missing; the curated "
+                "ECCCbuoys_types.json must be deployed before parsing")
+        with open(self.typesFile, 'r') as f:
+            types = json.load(f)
+        if not types:
+            raise RuntimeError(f"types file {self.typesFile} is empty")
+        return types
+
+
     def toCSV(self):
     
         mapping = self.getMapping()
@@ -216,40 +220,42 @@ class Marine_buoy_parser:
         csv_path = os.path.join(self.csvFolder, wmo_synop_id + ".csv")
         if not os.path.isfile(csv_path):
             self.createCSVHeader()
-            
+            ok, reason = validate_nccsv_header(csv_path)
+            if not ok:
+                os.remove(csv_path)
+                raise RuntimeError(f"wrote invalid NCCSV header for {csv_path}, removed it: {reason}")
+
         for field in self.data["observations"]:
                 if field not in mapping[wmo_synop_id]["observations"]:
-                    #TODO  handle this case and updated csv header/add sentry call 
-                    #TODO remove print and add logging
-                    print(f"Warning: observation field '{field}' not found in mapping")
+                    #TODO  handle this case and update csv header/add sentry call
+                    logger.warning(f"observation field '{field}' not found in mapping")
         data = []
         for field in mapping[wmo_synop_id]["metadata"]:
             try:
                 data.append(self.data['metadata'][field]['value'])
             except KeyError:
-                print(f"Warning: metadata field '{field}' not found in metadata")
+                logger.warning(f"metadata field '{field}' not found in metadata")
                 data.append('')
 
         for field in mapping[wmo_synop_id]["observations"]:
             try:
                 if self.data["observations"][field]['value'] == 'MSNG':
                     data.append('')
-                else: 
+                else:
                     data.append(self.data["observations"][field]['value'])
             except KeyError:
                 #TODO handle this case and add sentry call
-                #TODO remove prints and add logging
-                print(f"Warning: observation field '{field}' not found in data")
+                logger.warning(f"observation field '{field}' not found in data")
                 data.append('')
-            try:     
+            try:
                 data.append(self.data["observations"][field]['qualifiers']['qa_summary']['value'])
             except KeyError:
-                print(f"Warning: qualifier 'qa_summary' not found in '{field}'")
+                logger.warning(f"qualifier 'qa_summary' not found in '{field}'")
                 data.append('')
             try:
                 data.append(self.data["observations"][field]['qualifiers']['data_flag']['value'])
             except KeyError:
-                print(f"Warning: qualifier 'data_flag' not found in '{field}'")
+                logger.warning(f"qualifier 'data_flag' not found in '{field}'")
                 data.append('')
                 
         with open(csv_path, 'a') as fh:
@@ -290,18 +296,18 @@ class Marine_buoy_parser:
     
 
     def dirTOCSV(self, directory):
-        print(f"Processing directory: {directory}")
+        logger.info(f"Processing directory: {directory}")
         for file in os.listdir(directory):
             full_path = os.path.join(directory, file)
             if os.path.isfile(full_path):
-                print(f"Processing file: {file}")
+                logger.info(f"Processing file: {file}")
                 data = self.parse_marine_xml(full_path)
                 if data:
                     self.toCSV()
                 else:
-                    print(f"Failed to parse file: {file}")
+                    logger.error(f"Failed to parse file: {file}")
             else:
-                print(f"Skipping non-file entry: {file}")
+                logger.info(f"Skipping non-file entry: {file}")
 
 
     def parse_marine_xml(self, file_path):
@@ -368,17 +374,14 @@ class Marine_buoy_parser:
             self.data={"metadata": metadata, "observations": observations}
             #print(self.data)
             return self.data
-        except ET.ParseError as e:
-            traceback.print_exc()
-            print(f"Error parsing XML file: {e}")
+        except ET.ParseError:
+            logger.exception(f"Error parsing XML file: {file_path}")
             return None
         except FileNotFoundError:
-            traceback.print_exc()
-            print(f"File not found: {filename}")
+            logger.exception(f"File not found: {file_path}")
             return None
-        except Exception as e:
-            traceback.print_exc()            
-            print(f"Unexpected error: {e}")
+        except Exception:
+            logger.exception(f"Unexpected error parsing {file_path}")
             return None
 
 

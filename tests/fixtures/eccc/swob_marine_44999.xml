@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Minimal synthetic SWOB-ML marine buoy message for tests (fake station 44999). -->
+<om:ObservationCollection xmlns:om="http://www.opengis.net/om/1.0"
+                          xmlns:gml="http://www.opengis.net/gml"
+                          xmlns:po="http://dms.ec.gc.ca/schema/point-observation/2.0">
+  <om:member>
+    <om:Observation>
+      <om:metadata>
+        <po:set>
+          <po:identification-elements>
+            <po:element name="date_tm" uom="datetime" value="2026-07-15T12:00:00.000Z"/>
+            <po:element name="lat" uom="&#176;" value="44.25"/>
+            <po:element name="long" uom="&#176;" value="-63.41"/>
+            <po:element name="stn_typ" uom="unitless" value="0"/>
+            <po:element name="wmo_synop_id" uom="unitless" value="44999"/>
+            <po:element name="wmo_id_extnd" uom="unitless" value="0044999"/>
+            <po:element name="stn_nam" uom="unitless" value="Test Buoy"/>
+            <po:element name="msc_id" uom="unitless" value="9999999"/>
+            <po:element name="stn_elev" uom="m" value="0.0"/>
+            <po:element name="rpt_typ" uom="unitless" value="a"/>
+          </po:identification-elements>
+        </po:set>
+      </om:metadata>
+      <om:result>
+        <po:elements>
+          <po:element name="avg_air_temp_pst10mts" uom="&#176;C" value="12.3">
+            <po:qualifier name="qa_summary" uom="unitless" value="100"/>
+            <po:qualifier name="data_flag" uom="code" value="0"/>
+          </po:element>
+          <po:element name="avg_sea_sfc_temp_pst10mts" uom="&#176;C" value="MSNG">
+            <po:qualifier name="qa_summary" uom="unitless" value="-1"/>
+          </po:element>
+        </po:elements>
+      </om:result>
+    </om:Observation>
+  </om:member>
+</om:ObservationCollection>

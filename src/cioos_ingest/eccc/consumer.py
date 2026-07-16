@@ -13,7 +13,7 @@ import requests
 import socket
 import uuid
 from pathlib import Path
-from cioos_ingest.eccc.swob_parser import Marine_buoy_parser
+from cioos_ingest.eccc.swob_parser import Marine_buoy_parser, validate_nccsv_header
 from cioos_ingest.publish import publish_files
 from prefect.logging import get_run_logger
 from prefect import flow, task
@@ -156,6 +156,12 @@ class SarraceniaStyleAMQP:
             # note that a remote PUBLISH_URL re-uploads the full station file
             # on every message.
             if csv_path:
+                # A station file with an incomplete NCCSV header is unreadable
+                # by ERDDAP forever (issue #5) — never let one reach /datasets.
+                ok, reason = validate_nccsv_header(csv_path)
+                if not ok:
+                    logger.error(f"❌ Not publishing {csv_path}: {reason}")
+                    return
                 publish_files([Path(csv_path)],
                               os.environ.get("ECCC_DATASET_NAME", "ECCCbuoys"),
                               pipeline="eccc", logger=logger)

@@ -14,10 +14,6 @@
         "unit": "\u00b0",
         "rename":"longitude"
     },
-    "stn_typ": {
-        "type": "float",
-        "unit": "code"
-    },
     "wmo_synop_id": {
         "type": "float",
         "unit": "unitless"
