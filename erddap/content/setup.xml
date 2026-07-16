@@ -403,16 +403,7 @@ If you don't use [standardShortDescriptionHtml], at least include a link like:
 All of the information in [standardShortDescriptionHtml] is also contained in
 <theLongDescriptionHtml> in messages.xml.
 -->
-  <theShortDescriptionHtml><![CDATA[
-<h1>ERDDAP</h1>
-ERDDAP
-is a data server that gives you a simple, consistent way to download
-subsets of scientific datasets in common file formats and make graphs and maps.
-This particular ERDDAP installation has data from Amundsen Science and associated organizations.
-[standardShortDescriptionHtml]
-
-]]>
-  </theShortDescriptionHtml>
+  <!-- theShortDescriptionHtml omitted: use ERDDAP's default from messages.xml -->
 
   <!-- startHeadHtml has the start of the HTML document and the 'head' tags
 (starting at "<!DOCTYPE", but not including "</head>")
@@ -440,65 +431,7 @@ the links within the .css file wouldn't switch between http: and https:.
 There doesn't seem to be a way around this other than using inline style
 information.
 -->
-  <startHeadHtml5><![CDATA[
-<!DOCTYPE html>
-<html lang="en-US" id="htmlLang">
-<head>
-<meta charset="UTF-8">
-<title id="pageTitle">CIOOS ERDDAP</title>
-<link rel="shortcut icon" href="&erddapUrl;/images/ICON_White_Bg_Teal.svg">
-<link href="&erddapUrl;/images/erddap2.css" rel="stylesheet" type="text/css">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script>
-  var isFrench = window.location.pathname.includes('/erddap/fr/');
-  document.getElementById('pageTitle').textContent = isFrench ? 'SIOOC ERDDAP' : 'CIOOS ERDDAP';
-  document.getElementById('htmlLang').lang = isFrench ? 'fr-CA' : 'en-US';
-</script>
-]]>
-  </startHeadHtml5>
-
-
-
-  <!-- The standard startBodyHtml -->
-  <startBodyHtml5><![CDATA[
-<body>
-<link href="&erddapUrl;/images/erddap2.css" rel="stylesheet" type="text/css">
-<script>
-  var isFrench = window.location.pathname.includes('/erddap/fr/');
-  var logoImg = document.currentScript.parentElement.querySelector('img[alt="Canadian Integrated Ocean Observing System"]');
-  var logoSrc = isFrench ? 'cioos-national_FR_W.svg' : 'cioos-national_EN_W.svg';
-  var taglineText = isFrench ? 'Accès plus facile aux données' : 'Easier access to data';
-  if (!logoImg) {
-    document.addEventListener('DOMContentLoaded', function() {
-      logoImg = document.querySelector('img[alt="Canadian Integrated Ocean Observing System"]');
-      if (logoImg) logoImg.src = '&erddapUrl;/images/' + logoSrc;
-      var tagline = document.querySelector('small');
-      if (tagline) tagline.textContent = taglineText;
-    });
-  } else {
-    logoImg.src = '&erddapUrl;/images/' + logoSrc;
-    var tagline = document.currentScript.parentElement.querySelector('small');
-    if (tagline) tagline.textContent = taglineText;
-  }
-</script>
-<div id="header" class="header">
-  <div id="header-title-logo">
-    <div id="header-logo">
-      <a rel="bookmark" href="&erddapUrl;"><img
-      title="Canadian Integrated Ocean Observing System" src="&erddapUrl;/images/cioos-national_EN_W.svg" alt="Canadian Integrated Ocean Observing System"></a>
-    </div>
-    <div id="header-title">
-      <strong>ERDDAP</strong><br>
-      <small style="overflow:ellipsis;">Easier access to data</small>
-    </div>
-  </div>
-  <div id="header-right">
-    <div>&loginInfo;<br>&language;</div>
-  </div>
-</div>
-]]>
-  </startBodyHtml5>
-
-
+  <!-- startHeadHtml5 and startBodyHtml5 omitted: use ERDDAP's defaults from
+messages.xml (this is a test deployment; no custom branding). -->
 
 </erddapSetup>
