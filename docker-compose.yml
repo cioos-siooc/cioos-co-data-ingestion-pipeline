@@ -77,7 +77,7 @@ services:
       - PREFECT_API_URL=http://prefect:4200/api
       - PUBLISH_URL=file:///app/datasets
       - ARGO_CRON=0 7 * * *
-      - ARGO_FLOAT_LIMIT=10
+      - ARGO_FLOAT_LIMIT=0
       # - ARGO_FLOATS=4902674,4902530   # optional dev allowlist (overrides limit)
       # - ARGO_GDAC_URL=https://usgodae.org/pub/outgoing/argo   # US GODAE mirror
     depends_on:
