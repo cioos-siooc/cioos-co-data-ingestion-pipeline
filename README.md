@@ -236,21 +236,88 @@ fs.find("cioos-juno-buoy-data/datasets")           # every key
 fs.ls("cioos-juno-buoy-data/datasets/MEDS_CSV")    # one dataset
 ```
 
-### With a CLI
+### With rclone
 
-Neither of these ships with the project; install whichever suits you.
+The best fit for browsing, and the only tool here that shows **noncurrent
+versions**. Not bundled with the project — install the current release
+(Ubuntu 24.04's `apt` package is 1.60.1 from 2022, which predates
+`--s3-versions`):
 
-- **AWS CLI** (`uv tool install awscli`) — what the
-  [access doc](https://github.com/cioos-siooc/cioos-co-alliance-juno-infra/blob/main/docs/buoy-data-bucket-access.md)
-  documents, and what the `aws s3 ls` examples elsewhere in this README
-  assume. Remember `--endpoint-url`, and note that `--profile` makes the CLI
-  ignore `AWS_*` env vars.
-- **rclone** — the better fit for browsing. Configure one remote with
-  `provider = Ceph`, the endpoint and the two keys, then `rclone tree`,
-  `rclone ncdu` (interactive size browser), or `rclone mount` for a real
-  mountpoint. It is also the easiest way to see **noncurrent versions**, which
-  a plain `ls` hides — see [the versioning
-  section](#bucket-versioning-and-storage-growth).
+```sh
+curl -sSLO https://downloads.rclone.org/rclone-current-linux-amd64.zip
+# verify against https://downloads.rclone.org/v<VERSION>/SHA256SUMS, then:
+unzip -q rclone-current-linux-amd64.zip
+install -m 755 rclone-v*/rclone ~/.local/bin/rclone
+```
+
+`rclone config` would write the credentials into
+`~/.config/rclone/rclone.conf` as a second plaintext copy. Defining the remote
+through environment variables instead keeps `.env` the only place they live —
+save this as `~/.juno-rclone.sh` and `.` it when you need the `juno:` remote:
+
+```sh
+cd /path/to/cioos-co-data-ingestion-pipeline
+set -a; . ./.env; set +a
+export RCLONE_CONFIG=/dev/null          # silences the "no config file" notice
+export RCLONE_CONFIG_JUNO_TYPE=s3
+export RCLONE_CONFIG_JUNO_PROVIDER=Ceph
+export RCLONE_CONFIG_JUNO_ENDPOINT="$AWS_ENDPOINT_URL"
+export RCLONE_CONFIG_JUNO_REGION="$AWS_DEFAULT_REGION"
+export RCLONE_CONFIG_JUNO_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+export RCLONE_CONFIG_JUNO_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+export RCLONE_CONFIG_JUNO_FORCE_PATH_STYLE=true
+```
+
+(`RCLONE_CONFIG_<REMOTE>_<SETTING>` is the pattern, so `JUNO` is just the
+remote's name.)
+
+Browsing:
+
+```sh
+rclone lsd  juno:                                    # buckets
+rclone tree juno:cioos-juno-buoy-data                # the whole tree
+rclone lsl  juno:cioos-juno-buoy-data/datasets       # sizes + timestamps
+rclone size juno:cioos-juno-buoy-data                # object count + total
+rclone ncdu juno:cioos-juno-buoy-data                # interactive size browser
+rclone cat --count 200 \
+  juno:cioos-juno-buoy-data/datasets/MEDS_CSV/C44131.csv   # peek, no download
+```
+
+Seeing what versioning is holding — neither pandas nor `aws s3 ls` shows this:
+
+```sh
+rclone lsf -R --s3-versions juno:cioos-juno-buoy-data
+rclone size      --s3-versions juno:cioos-juno-buoy-data
+```
+
+Deleted keys still appear here as noncurrent versions, which is the mechanism
+behind [the storage growth
+problem](#bucket-versioning-and-storage-growth).
+
+Mounting it as an ordinary folder (needs FUSE, present on most Linux hosts):
+
+```sh
+mkdir -p ~/juno-bucket
+rclone mount --read-only --daemon --vfs-cache-mode off \
+  juno:cioos-juno-buoy-data ~/juno-bucket
+ls ~/juno-bucket/datasets/            # ls, du, head, file managers all work
+fusermount3 -u ~/juno-bucket          # unmount
+```
+
+Keep `--read-only` unless you mean to write; drop `--daemon` to watch the log
+in the foreground. If you ever *do* write with rclone, add
+`--s3-no-check-bucket` so a mistyped bucket name fails instead of creating a
+new bucket (the same hazard `publish_files` avoids by skipping `makedirs`).
+
+### With the AWS CLI
+
+What the
+[access doc](https://github.com/cioos-siooc/cioos-co-alliance-juno-infra/blob/main/docs/buoy-data-bucket-access.md)
+documents, and what the `aws s3 ls` examples elsewhere in this README assume —
+but it is not installed by default either (`uv tool install awscli`). Remember
+`--endpoint-url`, and note that `--profile` makes the CLI ignore `AWS_*`
+environment variables, so with a profile the keys must also be in
+`~/.aws/credentials`.
 
 ### Sharing a file with someone who has no credentials
 
