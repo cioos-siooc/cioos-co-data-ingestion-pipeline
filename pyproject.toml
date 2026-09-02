@@ -1,7 +1,7 @@
 [project]
 name = "cioos-ingest"
 version = "0.1.0"
-description = "CIOOS ingestion pipelines (ECCC buoys, MEDS buoys, Argo Canada) publishing to ERDDAP"
+description = "CIOOS ingestion pipelines (ECCC buoys, MEDS buoys, Argo Canada) publishing to object storage"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -10,12 +10,13 @@ dependencies = [
     "pika>=1.3.2",
     "prefect>=3.4.22",
     "requests>=2.32.5",
+    "s3fs>=2024.10.0",
 ]
 
 [project.optional-dependencies]
-# fsspec backends for non-local PUBLISH_URL destinations (s3://, sftp://).
+# Extra fsspec backends for less common PUBLISH_URL destinations. s3fs is a
+# core dependency instead, since s3:// is the default destination.
 remote = [
-    "s3fs>=2024.10.0",
     "paramiko>=3.4",
 ]
 

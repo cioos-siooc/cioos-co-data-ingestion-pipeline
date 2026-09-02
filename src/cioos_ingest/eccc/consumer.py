@@ -156,8 +156,8 @@ class SarraceniaStyleAMQP:
             # note that a remote PUBLISH_URL re-uploads the full station file
             # on every message.
             if csv_path:
-                # A station file with an incomplete NCCSV header is unreadable
-                # by ERDDAP forever (issue #5) — never let one reach /datasets.
+                # A station file with an incomplete NCCSV header is
+                # unreadable forever (issue #5) — never publish one.
                 ok, reason = validate_nccsv_header(csv_path)
                 if not ok:
                     logger.error(f"❌ Not publishing {csv_path}: {reason}")

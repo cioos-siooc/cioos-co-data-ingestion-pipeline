@@ -4,8 +4,8 @@ Prefect entrypoint for the Argo Canada (MEDS GDAC) pipeline.
 
 Scheduled batch flow, same shape as the MEDS buoy pipeline: mirror the
 aggregated ``<WMO>_prof.nc`` files from the GDAC's ``dac/meds/`` tree, then
-publish them to the PUBLISH_URL destination (default: the local datasets dir
-ERDDAP serves as ARGO_MEDS, EDDTableFromMultidimNcFiles). ``main()`` serves
+publish them to the PUBLISH_URL destination as ARGO_MEDS (default: the CIOOS
+Juno buoy bucket; see cioos_ingest.publish). ``main()`` serves
 the flow on a daily cron; set ``ARGO_RUN_NOW=1`` to run once and exit.
 
 No fix step is needed: the GDAC NetCDF is already CF-compliant Argo format —
@@ -63,11 +63,12 @@ def download(wanted=None, limit=None):
     return NC_DIR
 
 
-@task(name="publish-to-erddap", cache_policy=NO_CACHE)
+@task(name="publish", cache_policy=NO_CACHE)
 def publish():
     logger = get_run_logger()
-    # skip_unchanged keeps the mtime-based "only copy what the GDAC actually
-    # updated" behaviour ERDDAP's change detection relies on.
+    # skip_unchanged avoids re-uploading floats the GDAC didn't update. On
+    # object storage there is no source mtime, so the check degrades to
+    # size-only (see cioos_ingest.publish).
     return publish_files(sorted(NC_DIR.glob("*_prof.nc")), DATASET_NAME,
                          pipeline="argo", skip_unchanged=True, logger=logger)
 
