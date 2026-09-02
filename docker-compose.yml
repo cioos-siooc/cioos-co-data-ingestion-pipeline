@@ -20,6 +20,13 @@ services:
 
   # All three pipelines run from the same image (built once from the root
   # Dockerfile); the per-service `command:` picks the pipeline via the CLI.
+  #
+  # Each publishes to PUBLISH_URL — by default the CIOOS Juno buoy bucket, a
+  # Ceph RADOS Gateway speaking S3. The two AWS_* credentials come from the
+  # gitignored .env locally, or from Coolify's environment variables in
+  # production; they are never committed. Endpoint and region carry defaults
+  # (the region is a placeholder the gateway ignores, but SDKs demand one).
+  # Set PUBLISH_URL=file:///app/datasets to publish locally instead.
 
   # Real-time ECCC buoy pipeline: long-running AMQP consumer of the MSC Datamart
   # SWOB-ML marine feed, appending NCCSV rows per station.
@@ -28,33 +35,37 @@ services:
     image: cioos-ingest:local
     command: ["cioos-ingest", "eccc"]
     volumes:
-      # Buoy NCCSV files are written into the shared datasets dir, which the
-      # erddap service reads at /datasets.
-      - ./datasets:/app/datasets
       - ./config/eccc:/app/config
       - ./data/eccc:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
-      - PUBLISH_URL=file:///app/datasets
+      - PUBLISH_URL=${PUBLISH_URL:-s3://cioos-juno-buoy-data/datasets}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-https://objets.juno.calculquebec.ca}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
     depends_on:
       prefect:
         condition: service_healthy
     restart: unless-stopped
 
   # Non-real-time MEDS buoy pipeline: a scheduled Prefect flow that downloads the
-  # MEDS CSV archive, fixes it, and writes per-station CSVs into the same national
-  # ERDDAP datasets dir. Served on a daily cron (see MEDS_CRON); trigger a run
-  # from the Prefect UI to populate immediately on first boot.
+  # MEDS CSV archive, fixes it, and publishes per-station CSVs. Served on a daily
+  # cron (see MEDS_CRON); trigger a run from the Prefect UI to populate
+  # immediately on first boot.
   meds_buoy_parser:
     build: .
     image: cioos-ingest:local
     command: ["cioos-ingest", "meds"]
     volumes:
-      - ./datasets:/app/datasets
       - ./data/meds:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
-      - PUBLISH_URL=file:///app/datasets
+      - PUBLISH_URL=${PUBLISH_URL:-s3://cioos-juno-buoy-data/datasets}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-https://objets.juno.calculquebec.ca}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
       - MEDS_CRON=0 6 * * *
       # - MEDS_STATIONS=c46131,meds210,wel233   # optional dev allowlist
     depends_on:
@@ -63,19 +74,22 @@ services:
     restart: unless-stopped
 
   # Argo Canada pipeline: a scheduled Prefect flow that mirrors the MEDS DAC's
-  # aggregated <WMO>_prof.nc files from the Argo GDAC into the national ERDDAP
-  # datasets dir (served as ARGO_MEDS). Demo default mirrors only the first 10
-  # floats — set ARGO_FLOAT_LIMIT=0 for the full DAC (~900 floats, ~2 GB).
+  # aggregated <WMO>_prof.nc files from the Argo GDAC and publishes them as
+  # ARGO_MEDS. Set ARGO_FLOAT_LIMIT to mirror only the first N floats
+  # (0 = the full DAC, ~900 floats, ~2 GB).
   argo_meds_parser:
     build: .
     image: cioos-ingest:local
     command: ["cioos-ingest", "argo"]
     volumes:
-      - ./datasets:/app/datasets
       - ./data/argo:/app/data
     environment:
       - PREFECT_API_URL=http://prefect:4200/api
-      - PUBLISH_URL=file:///app/datasets
+      - PUBLISH_URL=${PUBLISH_URL:-s3://cioos-juno-buoy-data/datasets}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL:-https://objets.juno.calculquebec.ca}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
       - ARGO_CRON=0 7 * * *
       - ARGO_FLOAT_LIMIT=0
       # - ARGO_FLOATS=4902674,4902530   # optional dev allowlist (overrides limit)
@@ -83,29 +97,6 @@ services:
     depends_on:
       prefect:
         condition: service_healthy
-    restart: unless-stopped
-
-  # Local ERDDAP instance for developing and testing the datasets produced by
-  # the pipelines — production ERDDAP deployment is managed elsewhere. The
-  # axiom image's entrypoint assembles erddap/content/datasets.xml from the
-  # committed ./datasets.d/*.xml fragments at container start, so fragment
-  # edits take effect on `docker compose restart erddap`.
-  erddap:
-    image: axiom/docker-erddap:v2.28.1
-    ports:
-      - "${ERDDAP_PORT:-8080}:8080"
-    environment:
-      ERDDAP_flagKeyKey: ${ERDDAP_flagKeyKey:?set in .env (see .env.example)}
-      # JVM heap floor/ceiling — the image's setenv.sh turns these into
-      # -Xms/-Xmx. Override per host in .env if the box is tighter or roomier.
-      ERDDAP_MIN_MEMORY: ${ERDDAP_MIN_MEMORY:-1G}
-      ERDDAP_MAX_MEMORY: ${ERDDAP_MAX_MEMORY:-2G}
-    volumes:
-      - ./erddap/conf/robots.txt:/usr/local/tomcat/webapps/ROOT/robots.txt
-      - ./erddap/content:/usr/local/tomcat/content/erddap
-      - ./erddap/data:/erddapData
-      - ./datasets:/datasets
-      - ./datasets.d:/datasets.d
     restart: unless-stopped
 
 volumes:
