@@ -185,6 +185,87 @@ It is a **Ceph RADOS Gateway** speaking the S3 API. Four differences matter:
   That is cheap locally but has a real cost against a versioned bucket — see
   below.
 
+## Inspecting the bucket
+
+The bucket is private, so there is no URL to open in a browser — reading it
+always means an authenticated client. Load the credentials into the
+environment first:
+
+```sh
+set -a; . ./.env; set +a
+```
+
+### With Python (no extra tooling)
+
+`s3fs` is already a dependency, so pandas reads the bucket directly. This is
+the quickest way to spot-check a pipeline's output:
+
+```python
+import pandas as pd
+so = {"anon": False}          # picks up AWS_* from the environment
+
+# MEDS — plain CSV, reads as-is
+pd.read_csv("s3://cioos-juno-buoy-data/datasets/MEDS_CSV/C44131.csv",
+            storage_options=so, nrows=5)
+```
+
+ECCC needs one extra step. NCCSV puts ~230 lines of column metadata *before*
+the column-name row, so find `*END_METADATA*` and skip past it. Reading the
+file without this parses the metadata instead of the data: you get a
+three-column frame of `*GLOBAL*,attribute,value` rows, not the observations.
+
+```python
+import s3fs
+fs = s3fs.S3FileSystem(anon=False)
+key = "cioos-juno-buoy-data/datasets/ECCCbuoys/44488.csv"
+
+lines = fs.cat(key).decode().splitlines()
+skip = next(i for i, l in enumerate(lines) if "*END_METADATA*" in l) + 1
+pd.read_csv(f"s3://{key}", storage_options=so, skiprows=skip)
+```
+
+Argo publishes NetCDF, which needs `xarray` and a backend — neither is a
+dependency of this project (`uv add xarray h5netcdf` if you want them), and
+`xr.open_dataset` on a `_prof.nc` wants `engine="h5netcdf"` plus the
+`N_PROF`/`N_LEVELS` dimensions in mind.
+
+To list what's there:
+
+```python
+fs.find("cioos-juno-buoy-data/datasets")           # every key
+fs.ls("cioos-juno-buoy-data/datasets/MEDS_CSV")    # one dataset
+```
+
+### With a CLI
+
+Neither of these ships with the project; install whichever suits you.
+
+- **AWS CLI** (`uv tool install awscli`) — what the
+  [access doc](https://github.com/cioos-siooc/cioos-co-alliance-juno-infra/blob/main/docs/buoy-data-bucket-access.md)
+  documents, and what the `aws s3 ls` examples elsewhere in this README
+  assume. Remember `--endpoint-url`, and note that `--profile` makes the CLI
+  ignore `AWS_*` env vars.
+- **rclone** — the better fit for browsing. Configure one remote with
+  `provider = Ceph`, the endpoint and the two keys, then `rclone tree`,
+  `rclone ncdu` (interactive size browser), or `rclone mount` for a real
+  mountpoint. It is also the easiest way to see **noncurrent versions**, which
+  a plain `ls` hides — see [the versioning
+  section](#bucket-versioning-and-storage-growth).
+
+### Sharing a file with someone who has no credentials
+
+Use a presigned URL (`boto3`'s `generate_presigned_url`, with
+`addressing_style: "path"` as everywhere else) rather than handing out the
+key, which grants write and delete across the whole CIOOS project. Keep the
+expiry short. This has not been exercised against this gateway yet — confirm
+it works before depending on it.
+
+### Viewing it as data rather than files
+
+For graphs, subsetting and OPeNDAP the answer is ERDDAP, which this repo no
+longer runs — see [ERDDAP](#erddap) for what it would take to point one at
+this bucket.
+
 ## Bucket versioning and storage growth
 
 **The bucket is versioned, and this pipeline amplifies that hard. It needs a
