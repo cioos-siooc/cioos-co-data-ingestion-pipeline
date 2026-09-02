@@ -96,6 +96,10 @@ services:
       - "${ERDDAP_PORT:-8080}:8080"
     environment:
       ERDDAP_flagKeyKey: ${ERDDAP_flagKeyKey:?set in .env (see .env.example)}
+      # JVM heap floor/ceiling — the image's setenv.sh turns these into
+      # -Xms/-Xmx. Override per host in .env if the box is tighter or roomier.
+      ERDDAP_MIN_MEMORY: ${ERDDAP_MIN_MEMORY:-1G}
+      ERDDAP_MAX_MEMORY: ${ERDDAP_MAX_MEMORY:-2G}
     volumes:
       - ./erddap/conf/robots.txt:/usr/local/tomcat/webapps/ROOT/robots.txt
       - ./erddap/content:/usr/local/tomcat/content/erddap
