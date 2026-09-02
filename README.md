@@ -211,19 +211,21 @@ observation therefore re-uploads all history accumulated so far, and versioning
 retains every one of those cumulative snapshots. Retained bytes grow
 **quadratically** in observation count, not linearly.
 
-Order of magnitude per station per year, assuming hourly reporting (measured:
-103 columns; estimated ~300 B/row and ~30 KB of NCCSV header):
+Order of magnitude per station per year, assuming hourly reporting. The file
+geometry is measured from a published station file: 103 columns, 361 B per data
+row, 20.7 KB of NCCSV header (234 lines of column metadata, which is why an
+almost-empty station file is still ~21 KB).
 
 | | |
 |---|---|
 | Uploads | ~8,760 |
-| Live file size after a year | ~2.7 MB |
-| Sum of all retained versions | `8760×30 KB + 300 B×8760²/2` ≈ **11.8 GB** |
+| Live file size after a year | ~3.2 MB |
+| Sum of all retained versions | `8760×20.7 KB + 361 B×8760²/2` ≈ **14 GB** |
 
-That is roughly 4,400× amplification — on the order of 1 TB/year across a
-~100-buoy feed backing ~270 MB of actual data. The station count and reporting
-cadence are assumptions, not measurements, but the shape holds at any plausible
-values.
+That is roughly 4,400× amplification — on the order of 1.4 TB/year across a
+~100-buoy feed backing ~320 MB of actual data. The reporting cadence and
+station count are assumptions, not measurements, but the shape holds at any
+plausible values.
 
 Argo has a milder form of the same thing: ~900 files of ~2 MB, each fully
 re-uploaded whenever a float adds a cycle.
