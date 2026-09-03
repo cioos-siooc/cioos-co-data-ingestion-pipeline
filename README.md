@@ -256,8 +256,9 @@ through environment variables instead keeps `.env` the only place they live —
 save this as `~/.juno-rclone.sh` and `.` it when you need the `juno:` remote:
 
 ```sh
-cd /path/to/cioos-co-data-ingestion-pipeline
-set -a; . ./.env; set +a
+# Source (don't run) this: `. ~/.juno-rclone.sh`. Absolute path so it works from
+# any directory — sourcing must not move the shell you're working in.
+set -a; . /path/to/cioos-co-data-ingestion-pipeline/.env; set +a
 export RCLONE_CONFIG=/dev/null          # silences the "no config file" notice
 export RCLONE_CONFIG_JUNO_TYPE=s3
 export RCLONE_CONFIG_JUNO_PROVIDER=Ceph
@@ -270,6 +271,10 @@ export RCLONE_CONFIG_JUNO_FORCE_PATH_STYLE=true
 
 (`RCLONE_CONFIG_<REMOTE>_<SETTING>` is the pattern, so `JUNO` is just the
 remote's name.)
+
+Every `rclone` command below needs those variables in *its* shell. Without them
+rclone falls back to `~/.config/rclone/rclone.conf` and fails with `didn't find
+section in config file ("juno")` — source the script again in each new terminal.
 
 Browsing:
 
@@ -303,6 +308,9 @@ rclone mount --read-only --daemon --vfs-cache-mode off \
 ls ~/juno-bucket/datasets/            # ls, du, head, file managers all work
 fusermount3 -u ~/juno-bucket          # unmount
 ```
+
+The daemon keeps the credentials it started with, so once it's up any shell can
+read `~/juno-bucket` without sourcing anything.
 
 Keep `--read-only` unless you mean to write; drop `--daemon` to watch the log
 in the foreground. If you ever *do* write with rclone, add
