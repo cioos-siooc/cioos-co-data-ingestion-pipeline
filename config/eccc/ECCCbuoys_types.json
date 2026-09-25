@@ -5,12 +5,12 @@
         "rename":"time"
     },
     "lat": {
-        "type": "float",
+        "type": "double",
         "unit": "\u00b0",
         "rename":"latitude"
     },
     "long": {
-        "type": "float",
+        "type": "double",
         "unit": "\u00b0",
         "rename":"longitude"
     },
@@ -20,6 +20,10 @@
     },
     "wmo_id_extnd": {
         "type": "float",
+        "unit": "unitless"
+    },
+    "logr_typ": {
+        "type": "string",
         "unit": "unitless"
     },
     "stn_nam": {
@@ -43,11 +47,11 @@
         "unit": "unitless"
     },
     "crnt_buoy_lat": {
-        "type": "float",
+        "type": "double",
         "unit": "\u00b0"
     },
     "crnt_buoy_long": {
-        "type": "float",
+        "type": "double",
         "unit": "\u00b0"
     },
     "avg_air_temp_pst10mts": {

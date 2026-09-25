@@ -111,3 +111,87 @@ def test_validator_rejects_truncated_header(tmp_path):
     ok, reason = validate_nccsv_header(bad)
     assert not ok
     assert '*END_METADATA*' in reason
+
+
+def _variant(tmp_path, name, **replace):
+    """Write a copy of the fixture with literal text substitutions."""
+    text = FIXTURE_XML.read_text()
+    for old, new in replace.items():
+        assert old in text, old
+        text = text.replace(old, new)
+    path = tmp_path / name
+    path.write_text(text)
+    return path
+
+
+def _dtypes(rows):
+    return {r[0]: r[2] for r in rows if len(r) >= 3 and r[1] == '*DATA_TYPE*'}
+
+
+def test_coordinates_are_double(parser, tmp_path):
+    # float (7 significant digits) rounded -132.443889 to -132.4439 in ERDDAP
+    xml = _variant(tmp_path, "precise.xml",
+                   **{'value="-63.41"': 'value="-132.443889"'})
+    parser.parse_marine_xml(xml)
+    rows, columns = _read_header(parser.toCSV())
+    assert _dtypes(rows)['latitude'] == 'double'
+    assert _dtypes(rows)['longitude'] == 'double'
+    assert rows[-1][columns.index('longitude')] == '-132.443889'
+
+
+def test_field_first_seen_later_is_added_and_old_rows_padded(parser, tmp_path):
+    parser.parse_marine_xml(FIXTURE_XML)
+    csv_path = parser.toCSV()
+
+    # a later message from the same station carries a new sensor
+    xml = _variant(
+        tmp_path, "later.xml",
+        **{'2026-07-15T12:00:00.000Z': '2026-07-15T13:00:00.000Z',
+           '<po:element name="avg_air_temp_pst10mts"':
+               '<po:element name="avg_wave_hgt_pst20mts" uom="m" value="0.9"/>\n'
+               '          <po:element name="avg_air_temp_pst10mts"'})
+    parser.parse_marine_xml(xml)
+    parser.toCSV()
+
+    ok, reason = validate_nccsv_header(csv_path)
+    assert ok, reason
+    rows, columns = _read_header(csv_path)
+    data = rows[rows.index(columns) + 1:]
+    assert [len(r) for r in data] == [len(columns)] * 2
+    i = columns.index('avg_wave_hgt_pst20mts')
+    assert [r[i] for r in data] == ['', '0.9']
+    assert data[0][columns.index('avg_air_temp_pst10mts')] == '12.3'
+
+
+def test_stale_header_is_regenerated_without_losing_rows(parser):
+    parser.parse_marine_xml(FIXTURE_XML)
+    csv_path = Path(parser.toCSV())
+    # simulate a file written before the types file said double
+    csv_path.write_text(csv_path.read_text().replace(
+        'latitude,*DATA_TYPE*,double', 'latitude,*DATA_TYPE*,float'))
+
+    rows_before, columns = _read_header(csv_path)
+    parser.toCSV()  # same observation again: header fixed, row not duplicated
+    rows, _ = _read_header(csv_path)
+    assert _dtypes(rows)['latitude'] == 'double'
+    assert rows[rows.index(columns) + 1:] == rows_before[rows_before.index(columns) + 1:]
+
+
+def test_redelivered_observation_is_not_appended_twice(parser):
+    parser.parse_marine_xml(FIXTURE_XML)
+    parser.toCSV()
+    parser.parse_marine_xml(FIXTURE_XML)
+    rows, columns = _read_header(parser.toCSV())
+    assert len(rows) - rows.index(columns) - 1 == 1
+
+
+def test_logger_type_kept_and_missing_metadata_blank(parser, tmp_path):
+    xml = _variant(
+        tmp_path, "logr.xml",
+        **{'<po:element name="stn_typ" uom="unitless" value="0"/>':
+               '<po:element name="stn_typ" uom="unitless" value="MSNG"/>\n'
+               '            <po:element name="logr_typ" uom="unitless" value="WM500"/>'})
+    parser.parse_marine_xml(xml)
+    rows, columns = _read_header(parser.toCSV())
+    assert rows[-1][columns.index('logr_typ')] == 'WM500'
+    assert rows[-1][columns.index('stn_typ')] == ''
