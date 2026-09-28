@@ -28,6 +28,8 @@ INVENTORY_URL = (
 # Unified superset column order for ALL buoy types. Modern "C" buoys populate
 # every column; historic MEDS/WEL buoys only carry the wave columns and leave the
 # rest empty. preciseLat/preciseLon hold the raw per-record coordinate.
+# SSTP_flags/SSTP_UQL are left empty here and filled by the SST QC (sst_qc.py)
+# for the stations it covers.
 COLUMN_ORDER = [
     "STN_ID",
     "DATE",
@@ -54,6 +56,8 @@ COLUMN_ORDER = [
     "SSTP",
     "preciseLat",
     "preciseLon",
+    "SSTP_flags",
+    "SSTP_UQL",
 ]
 
 # ISO 8601 UTC — matches the `units` attribute in the ERDDAP dataset fragment.
