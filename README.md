@@ -6,7 +6,8 @@ one Docker image, one CLI** (`cioos-ingest`), publishing files for ERDDAP:
 - **`cioos-ingest eccc`** — subscribes to ECCC/MSC Datamart over AMQP in real
   time, converts SWOB-ML XML to NCCSV, publishes the `ECCCbuoys` dataset.
 - **`cioos-ingest meds`** — downloads the DFO MEDS buoy CSV archive on a daily
-  schedule, fixes it up, publishes the `MEDS_CSV` dataset.
+  schedule, fixes it up, runs the automated SST QC on the Pacific `C*` buoys,
+  publishes the `MEDS_CSV` dataset.
 - **`cioos-ingest argo`** — mirrors Argo Canada profile NetCDF (the MEDS DAC
   tree at the Argo GDAC) on a daily schedule, publishes the `ARGO_MEDS`
   dataset; a federated `ArgoFloats_Ifremer` fragment demos the
@@ -202,6 +203,26 @@ ISO 8601 UTC, flips longitude to degrees east (raw values kept as
 `b_pw_inv.json`, and reindexes every buoy type to one unified column set —
 modern `C*` buoys carry wave + wind + pressure + temperature, historic
 `MEDS*`/`WEL*` buoys are wave-only with empty met cells.
+
+**SST QC.** After the fix step, the 17 Pacific buoys the legacy CIOOS Pacific
+job QC'd (`sst_qc.QC_STATIONS`) get `SSTP_flags` (1–16, higher is better) and
+`SSTP_UQL` (QARTOD 1/2/3/4) filled in; every other row leaves them empty. The
+algorithm, [`meds/qc.py`](src/cioos_ingest/meds/qc.py), is vendored unchanged
+from `cioos-siooc/cioos-pacific-pipeline`, where it reproduces the legacy
+`dfo_buoy_qc_operationalize` flags row for row; keep it in sync there. It
+compares each station's daily mean SST with the nearest NOAA OISST v2.1 cell
+and, up to 2020-12-31, with a static AVHRR record
+([`meds/data/`](src/cioos_ingest/meds/data/)), then flags out-of-range values,
+hourly jumps and isolated spikes. OISST comes from NOAA PSL's yearly global files, as in the
+legacy job. Each file is cropped to the NE Pacific box and cached as
+`MEDS_DATA_DIR/oisst/sst.day.mean.YYYY.nc` (~10 MB). The first run downloads
+~45 files of ~450 MB (about an hour); later runs re-fetch only the current
+year. Readings newer than the last OISST day stay unflagged until a later run. A station whose QC fails isn't
+republished (its previous file and flags stay) and the run ends Failed.
+
+The legacy job also topped the archive up with realtime SWOB rows and QC'd
+those. Here the QC covers the MEDS archive only. The ECCC realtime dataset
+isn't QC'd.
 
 ### Argo Canada (`cioos-ingest argo`)
 
