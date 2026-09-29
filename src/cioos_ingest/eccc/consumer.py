@@ -240,7 +240,9 @@ class SarraceniaStyleAMQP:
             logger.error(f"❌ Message processing error: {e}")
             logger.error(f"Message content: {body.decode('utf-8', errors='ignore')[:200]}")
             channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-    @task(name="start-message-consumer", cache_policy=NO_CACHE)
+    # Deliberately not a @task: it never returns, and a Prefect task's
+    # transaction keeps every task run started inside it alive until the
+    # task finishes, so each message leaked its task runs forever.
     def start_consuming(self):
         logger = get_run_logger()
         """Start consuming messages"""
