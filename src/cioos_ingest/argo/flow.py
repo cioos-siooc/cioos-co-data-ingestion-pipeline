@@ -10,7 +10,7 @@ the flow on a daily cron; set ``ARGO_RUN_NOW=1`` to run once and exit.
 
 No fix step is needed: the GDAC NetCDF is already CF-compliant Argo format —
 all reshaping for CIOOS/CDE happens in the ERDDAP fragment's addAttributes
-(see datasets.d/ARGO_MEDS.xml).
+(see datasets.d/DFO_MEDS_ARGO.xml in cioos-co-erddap).
 
 Paths default to the in-container mounts (see docker-compose.yml) but fall back
 to repo-relative dirs so a local ``uv run cioos-ingest argo`` works too.

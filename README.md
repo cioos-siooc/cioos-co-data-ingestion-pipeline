@@ -402,34 +402,19 @@ cost is up to N hours of publish latency.
 
 ## ERDDAP
 
-The pipelines no longer run or feed an ERDDAP instance; they publish to object
-storage and stop there. The local test ERDDAP that used to live in this repo
-(and read the pipelines' output over a shared `./datasets` bind mount) has been
-removed — see git history if it needs to come back.
+The pipelines publish to object storage and stop there. ERDDAP — its compose
+stack, the bucket-sync sidecar, and the dataset fragments in `datasets.d/`
+(`ECCC_MSC_BUOYS`, `DFO_MEDS_BUOYS`, `DFO_MEDS_ARGO`) — lives in
+[cioos-siooc/cioos-co-erddap](https://github.com/cioos-siooc/cioos-co-erddap).
+If `meds_fix.COLUMN_ORDER` or a source file's structure changes here, update
+the matching fragment there in the same breath.
 
-The dataset definitions in [`datasets.d/`](datasets.d/) are **kept** as the
-committed source of truth for dataset metadata, because they are hand-curated
-and cannot be reconstructed from the data files:
-
-- **Curated** (`MEDS.xml`, `ARGO_MEDS.xml`, `ArgoFloats_Ifremer.xml`) —
-  MEDS's `sourceName`s match `meds_fix.COLUMN_ORDER` exactly (plus the `Q_FLAG`
-  comment block and the `10000` missing-value sentinel); ARGO_MEDS carries the
-  CF/CDE attributes for the GDAC NetCDF. If `COLUMN_ORDER` or the source file
-  structure changes, update code and fragment together.
-- **Generated-then-frozen** (`ECCC.xml`) — originally produced by ERDDAP's
-  GenerateDatasetsXml from the NCCSV files and committed as-is; its datasetID
-  (`ECCCbuoys_2892_afd8_6091`) is deliberately frozen by being committed.
-
-Their `<fileDir>/datasets/<DATASET>/</fileDir>` paths are **inert** while output
-goes to the bucket. Note that ERDDAP 2.x cannot read `s3://` for these dataset
-types, so wiring a future ERDDAP to this bucket would need `<cacheFromUrl>` or
-a FUSE/rclone mount rather than a path change.
-
-`scripts/generate-datasets-xml.sh` (draft a fragment with ERDDAP's own tool and
-diff it against the committed one) and `scripts/DasDds.sh` (validate a
-fragment's parsed types) still work — they run the ERDDAP image ad-hoc via
-`docker run` and need no compose service — but they read a local `./datasets`,
-so populate it first with a `PUBLISH_URL=file://$PWD/datasets` run.
+`scripts/generate-datasets-xml.sh {eccc|meds|argo}` is kept here as a helper:
+it runs ERDDAP's GenerateDatasetsXml ad-hoc via `docker run` against a local
+`./datasets` (hydrate it from the bucket first — see the script header) and
+writes `logs/<NAME>.draft.xml` to diff against the fragment in cioos-co-erddap.
+`scripts/DasDds.sh` runs ERDDAP's DasDds the same way, to check a fragment's
+parsed types against that local `./datasets`.
 
 ## Pipeline notes
 
@@ -476,11 +461,12 @@ The flow mirrors those files with conditional GETs (unchanged floats cost one
 already CF-compliant Argo NetCDF — all reshaping is described in the
 `ARGO_MEDS.xml` fragment's `addAttributes`.
 
-`ArgoFloats_Ifremer.xml` is retained as a demo of the alternative integration
-route: a pure `EDDTableFromErddap` redirect to Ifremer covering **all** of
-global Argo, with no data hosting but also no ability to subset to Canadian
-floats or control metadata. Mirroring (this pipeline) is what buys Canadian
-scope and CDE-compatible attributes.
+The alternative integration route — a pure `EDDTableFromErddap` redirect to
+Ifremer's global ArgoFloats, hosting no data — was carried for a while as
+`ArgoFloats_Ifremer.xml` and has been removed; see git history if it is ever
+wanted back. It covered all of global Argo but could not subset to Canadian
+floats or control metadata, and was not CDE-harvestable. Mirroring (this
+pipeline) is what buys Canadian scope and CDE-compatible attributes.
 
 Production notes: the GDACs also offer rsync (`vdmzrs.ifremer.fr`) — the
 better transport when mirroring the full DAC; HTTP conditional-GET keeps this
