@@ -4,8 +4,8 @@ Prefect entrypoint for the MEDS buoy pipeline.
 
 Unlike the event-driven ECCC parser, MEDS bulk CSVs are non-real-time, so this is
 a scheduled batch flow: download (conditional) -> fix -> publish to the PUBLISH_URL
-destination (default: the local datasets dir ERDDAP serves; see cioos_ingest.publish
-for s3://, sftp://, ...). ``main()`` serves the flow on a daily cron so the
+destination (default: the CIOOS Juno buoy bucket; see cioos_ingest.publish for
+file://, sftp://, ...). ``main()`` serves the flow on a daily cron so the
 container stays alive as a Prefect deployment; set ``MEDS_RUN_NOW=1`` to run once
 and exit (useful for local testing / CI).
 
@@ -59,7 +59,7 @@ def fix():
     return FIXED_DIR
 
 
-@task(name="publish-to-erddap", cache_policy=NO_CACHE)
+@task(name="publish", cache_policy=NO_CACHE)
 def publish():
     logger = get_run_logger()
     return publish_files(sorted(FIXED_DIR.glob("*.csv")), DATASET_NAME,

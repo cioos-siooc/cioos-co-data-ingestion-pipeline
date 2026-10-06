@@ -5,24 +5,22 @@
 # In Coolify, point the resource at docker-compose.yml and add this file as an
 # additional compose file so Coolify merges it in.
 #
-# Drops erddap's and prefect's published host ports and adds SERVICE_FQDN_*
-# "magic" env vars: Coolify reads SERVICE_FQDN_<SERVICE>_<PORT> at deploy
-# time, generates a public FQDN for it, and proxies external traffic to that
-# container port over Coolify's internal network — so the host ports are
-# never bound directly.
+# Drops prefect's published host port and adds a SERVICE_FQDN_* "magic" env
+# var: Coolify reads SERVICE_FQDN_<SERVICE>_<PORT> at deploy time, generates a
+# public FQDN for it, and proxies external traffic to that container port over
+# Coolify's internal network — so the host port is never bound directly.
 #
-# The base file's `ports: "${ERDDAP_PORT:-8080}:8080"` and `"4200:4200"` work
-# fine for local/standalone use, but under Coolify they collide as soon as
-# more than one deployment of this stack (e.g. main + a feature branch, both
-# on cioos-co-dev-2) tries to bind the same host port — only one process can
-# hold a given 0.0.0.0 port at a time. `!reset` clears the base file's `ports`
-# list (compose overrides can only add to lists, not remove).
+# The base file's `ports: "4200:4200"` works fine for local/standalone use, but
+# under Coolify it collides as soon as more than one deployment of this stack
+# (e.g. main + a feature branch, both on cioos-co-dev-2) tries to bind the same
+# host port — only one process can hold a given 0.0.0.0 port at a time.
+# `!reset` clears the base file's `ports` list (compose overrides can only add
+# to lists, not remove).
+#
+# The parser services publish to object storage and expose no ports, so they
+# need no override here; their AWS_* credentials come from Coolify's
+# environment variables.
 services:
-  erddap:
-    ports: !reset []
-    environment:
-      - SERVICE_FQDN_ERDDAP_8080
-
   prefect:
     ports: !reset []
     environment:

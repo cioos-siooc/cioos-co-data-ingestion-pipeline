@@ -1,7 +1,8 @@
 # cioos-ingest
 
 Ingestion pipelines for Canadian marine data, packaged as **one Python package,
-one Docker image, one CLI** (`cioos-ingest`), publishing files for ERDDAP:
+one Docker image, one CLI** (`cioos-ingest`), publishing to the CIOOS buoy
+dataset bucket on Calcul Québec's Juno cloud:
 
 - **`cioos-ingest eccc`** — subscribes to ECCC/MSC Datamart over AMQP in real
   time, converts SWOB-ML XML to NCCSV, publishes the `ECCCbuoys` dataset.
@@ -9,16 +10,10 @@ one Docker image, one CLI** (`cioos-ingest`), publishing files for ERDDAP:
   schedule, fixes it up, publishes the `MEDS_CSV` dataset.
 - **`cioos-ingest argo`** — mirrors Argo Canada profile NetCDF (the MEDS DAC
   tree at the Argo GDAC) on a daily schedule, publishes the `ARGO_MEDS`
-  dataset; a federated `ArgoFloats_Ifremer` fragment demos the
-  ERDDAP-to-ERDDAP alternative.
+  dataset.
 
 Each pipeline publishes its files to a configurable destination
-(`PUBLISH_URL`: local directory by default, or `s3://` / `sftp://`), and a
-committed ERDDAP dataset fragment in [`datasets.d/`](datasets.d/) describes
-each dataset.
-
-> **The ERDDAP in this repo is a local instance for developing and testing
-> datasets only.** Production ERDDAP deployment is managed elsewhere.
+(`PUBLISH_URL`), defaulting to `s3://cioos-juno-buoy-data/datasets`.
 
 ## Architecture
 
@@ -28,27 +23,26 @@ each dataset.
 | `eccc_buoy_parser` | `cioos-ingest eccc` — real-time AMQP consumer | — |
 | `meds_buoy_parser` | `cioos-ingest meds` — daily batch | — |
 | `argo_meds_parser` | `cioos-ingest argo` — daily batch | — |
-| `erddap` | Local test ERDDAP serving the published datasets | `8080` |
 
 The three parser services share the single image built from the root
 `Dockerfile`; the per-service `command:` picks the pipeline.
 
 ```
-cioos-ingest eccc ──► datasets/ECCCbuoys/*.csv     ──┐
-cioos-ingest meds ──► datasets/MEDS_CSV/*.csv      ──┤   (via PUBLISH_URL,
-cioos-ingest argo ──► datasets/ARGO_MEDS/*_prof.nc ──┤    default file://)
-                                                      ▼
-   committed datasets.d/{ECCC,MEDS,ARGO_MEDS,ArgoFloats_Ifremer}.xml
-                                                      │
-              assembled into datasets.xml at erddap container start
-                                                      ▼
-                                         erddap ──► :8080/erddap
+cioos-ingest eccc ──► ECCCbuoys/*.csv     ──┐
+cioos-ingest meds ──► MEDS_CSV/*.csv      ──┤  via PUBLISH_URL (fsspec)
+cioos-ingest argo ──► ARGO_MEDS/*_prof.nc ──┤
+                                            ▼
+                    s3://cioos-juno-buoy-data/datasets/<DATASET>/
+                    (Ceph RADOS Gateway, objets.juno.calculquebec.ca)
 ```
 
 ## Quickstart
 
+You need the two bucket credentials from a CIOOS administrator — see
+[Credentials](#credentials).
+
 ```sh
-cp .env.example .env          # set ERDDAP_flagKeyKey to any non-default value
+cp .env.example .env          # then fill in the two AWS_* keys
 docker compose up --build
 ```
 
@@ -63,11 +57,12 @@ docker compose run --rm -e MEDS_RUN_NOW=1 -e MEDS_STATIONS=c44131 meds_buoy_pars
 docker compose run --rm -e ARGO_RUN_NOW=1 -e ARGO_FLOAT_LIMIT=2 argo_meds_parser
 ```
 
-Verify at <http://localhost:8080/erddap> (`tabledap/MEDS_CSV.html`,
-`tabledap/ARGO_MEDS.html`, `tabledap/ECCCbuoys_2892_afd8_6091.html`; the
-`ArgoFloats_Ifremer` dataset redirects to Ifremer). Since ERDDAP only starts
-serving a dataset after its first files exist, restart it after the first
-data lands: `docker compose restart erddap`.
+Verify what landed in the bucket:
+
+```sh
+aws --endpoint-url https://objets.juno.calculquebec.ca \
+    s3 ls --recursive s3://cioos-juno-buoy-data/datasets/
+```
 
 Stop everything with `docker compose down` (add `-v` to also drop the
 `prefect_data` volume).
@@ -84,14 +79,17 @@ Local development (Python 3.12, packaged with `uv`, single `uv.lock`):
 
 ```sh
 uv sync --all-extras
-uv run pytest                          # offline tests (MEDS, Argo, publish)
+uv run pytest                          # offline tests (MEDS, Argo, ECCC, publish)
 uv run cioos-ingest --help
 MEDS_RUN_NOW=1 MEDS_STATIONS=c44131 uv run cioos-ingest meds
 ```
 
+Two test suites are opt-in because they need the network:
 `ARGO_TEST_NETWORK=1 uv run pytest tests/test_argo.py` adds a live single-float
-GDAC round trip. `tests/eccc_driver.py` reprocesses a directory of downloaded
-SWOB XML without a live AMQP connection.
+GDAC round trip, and `JUNO_TEST_BUCKET=1 uv run pytest tests/test_publish.py`
+adds a publish/read/delete round trip against the real bucket (needs
+credentials). `tests/eccc_driver.py` reprocesses a directory of downloaded SWOB
+XML without a live AMQP connection.
 
 ## Configuration
 
@@ -100,81 +98,323 @@ the in-container values).
 
 | Var | Default | Purpose |
 | --- | --- | --- |
-| `PUBLISH_URL` | `file://./datasets` | Destination for published files (see below) |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | — | Bucket credentials; required for an `s3://` destination |
+| `AWS_ENDPOINT_URL` | `https://objets.juno.calculquebec.ca` | Juno S3 gateway |
+| `AWS_DEFAULT_REGION` | `us-east-1` | Placeholder; the gateway ignores it but SDKs require one |
+| `PUBLISH_URL` | `s3://cioos-juno-buoy-data/datasets` | Destination for published files (see below) |
 | `ECCC_PUBLISH_URL` / `MEDS_PUBLISH_URL` / `ARGO_PUBLISH_URL` | *(unset)* | Per-pipeline destination override |
-| `ECCC_DATASET_NAME` | `ECCCbuoys` | Dataset subdir at the destination |
-| `MEDS_DATASET_NAME` | `MEDS_CSV` | Dataset subdir + ERDDAP datasetID |
-| `ARGO_DATASET_NAME` | `ARGO_MEDS` | Dataset subdir + ERDDAP datasetID |
+| `ECCC_DATASET_NAME` | `ECCCbuoys` | Dataset subdir/prefix at the destination |
+| `MEDS_DATASET_NAME` | `MEDS_CSV` | Dataset subdir/prefix at the destination |
+| `ARGO_DATASET_NAME` | `ARGO_MEDS` | Dataset subdir/prefix at the destination |
 | `ECCC_DATA_DIR` / `MEDS_DATA_DIR` / `ARGO_DATA_DIR` | `data` | Per-pipeline work dir |
 | `ECCC_CONFIG_DIR` | `config` | ECCC station mapping/types JSON dir |
 | `MEDS_CRON` / `ARGO_CRON` | `0 6 * * *` / `0 7 * * *` | Daily schedules |
 | `MEDS_RUN_NOW` / `ARGO_RUN_NOW` | *(unset)* | Run once and exit instead of serving |
 | `MEDS_STATIONS` | *(all)* | Station allowlist, e.g. `c46131,meds210` |
 | `ARGO_FLOATS` | *(unset)* | WMO allowlist, e.g. `4902674,4902530` |
-| `ARGO_FLOAT_LIMIT` | `10` | Demo default: first N floats. `0` = all (~900 floats, ~2 GB) |
+| `ARGO_FLOAT_LIMIT` | `0` | First N floats. `0` = all (~900 floats, ~2 GB) |
 | `ARGO_GDAC_URL` | `https://data-argo.ifremer.fr` | GDAC mirror; alt: `https://usgodae.org/pub/outgoing/argo` |
-| `ERDDAP_PORT` / `ERDDAP_flagKeyKey` | `8080` / — | Local test ERDDAP (in `.env`) |
+
+Note that the code default in
+[`publish.py`](src/cioos_ingest/publish.py) is `file://./datasets` — the
+`s3://` default above comes from `docker-compose.yml`, so a bare `uv run`
+outside compose publishes locally unless you set `PUBLISH_URL`.
+
+### Credentials
+
+Credentials are issued by a CIOOS administrator; there is no self-service. Put
+them in the gitignored `.env` locally, and in the Coolify resource's
+Environment Variables tab for the deployment. **Never** commit them, bake them
+into an image, or log them.
+
+The issued key can read, write and delete **any bucket in the CIOOS project**,
+not just this one — there is no per-bucket permission system in this storage
+backend, so the key is far more powerful than the job it does. Report a leak to
+the CIOOS infrastructure team immediately; it is revocable in seconds.
+
+Full access documentation, including troubleshooting, lives in the
+infrastructure repo:
+[`cioos-co-alliance-juno-infra` → `docs/buoy-data-bucket-access.md`](https://github.com/cioos-siooc/cioos-co-alliance-juno-infra/blob/main/docs/buoy-data-bucket-access.md).
 
 ## Publishing destinations
 
 Publishing goes through [`cioos_ingest.publish`](src/cioos_ingest/publish.py)
 (fsspec). The destination URL resolves as `<PIPELINE>_PUBLISH_URL` >
-`PUBLISH_URL` > `file://./datasets`.
+`PUBLISH_URL` > `file://./datasets`. Files land at
+`<PUBLISH_URL>/<DATASET_NAME>/<filename>`.
 
-- **`file://`** (default) — plain local copy, mtimes preserved
-  (`shutil.copy2`); this is what the compose stack uses
-  (`PUBLISH_URL=file:///app/datasets`, bind-mounted to `./datasets`, which
-  ERDDAP reads at `/datasets`). Don't change one side of that mount without
-  the other.
-- **`s3://bucket/prefix`** — needs the `remote` extra (included in the Docker
-  image; locally `uv sync --all-extras`). Credentials via the standard
-  `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (+ `AWS_ENDPOINT_URL` for
-  MinIO-style endpoints). Example smoke test against MinIO:
-  `PUBLISH_URL=s3://test-bucket/datasets AWS_ENDPOINT_URL=http://localhost:9000 ...`
-- **`sftp://user@host/path`** — needs the `remote` extra; password in the URL
-  or standard SSH keys.
+- **`s3://bucket/prefix`** (the compose default) — the CIOOS Juno bucket.
+  Credentials via the standard `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`,
+  endpoint via `AWS_ENDPOINT_URL`.
+- **`file://`** — plain local copy, mtimes preserved (`shutil.copy2`). Useful
+  for offline work and for the `scripts/` helpers, which read `./datasets`.
+- **`sftp://user@host/path`** — needs the `remote` extra
+  (`uv sync --all-extras`); password in the URL or standard SSH keys.
 
-Caveats for non-local destinations: Argo's skip-unchanged check falls back
-from mtime+size to size-only, and the ECCC consumer re-uploads the full
-station CSV on every AMQP message (fine locally, chattier remotely).
+### The Juno store is not AWS
 
-## ERDDAP dataset fragments (`datasets.d/`)
+It is a **Ceph RADOS Gateway** speaking the S3 API. Four differences matter:
 
-`datasets.d/*.xml` are the **committed source of truth** for the dataset
-definitions. The `erddap` service (`axiom/docker-erddap`) assembles them into
-`erddap/content/datasets.xml` at container start — after editing a fragment,
-`docker compose restart erddap`.
+- **Path-style addressing is mandatory.** There is no wildcard DNS for buckets
+  and the TLS certificate covers only `objets.juno.calculquebec.ca`, so a
+  virtual-host-style client fails with a DNS or certificate error naming
+  `cioos-juno-buoy-data.objets…` rather than a useful S3 error. `botocore`
+  (hence `s3fs`) already defaults to path style whenever a custom
+  `endpoint_url` is set, which is why no client configuration is needed here.
+- **The bucket is private and has no anonymous read.** An unauthenticated
+  request gets `NoSuchBucket` (404), *not* `AccessDenied` — the gateway won't
+  confirm that a bucket it won't serve exists. **A 404 does not mean the bucket
+  is missing**; it usually means the credentials never reached the request.
+  `publish.check_credentials` catches the common case of unset keys up front so
+  this doesn't have to be diagnosed from a 404. Relatedly, `publish_files`
+  issues no `makedirs` on s3: s3fs would interpret that 404 as "no such bucket"
+  and try to *create* it, and the issued key is permitted to do so — a
+  misspelled bucket name would otherwise leave a stray bucket in the CIOOS
+  project. `put_file` creates the key by itself.
+- **The region is a placeholder.** Any value works; use `us-east-1`.
+- **`SignatureDoesNotMatch`** almost always means the access key id was pasted
+  into both fields. They are different 32-character values.
 
-Two kinds of fragment:
+### Caveats
 
-- **Curated** (`MEDS.xml`, `ARGO_MEDS.xml`, `ArgoFloats_Ifremer.xml`) —
-  hand-reviewed: MEDS's `sourceName`s match `meds_fix.COLUMN_ORDER` exactly
-  (plus the `Q_FLAG` comment block and the `10000` missing-value sentinel);
-  ARGO_MEDS carries the CF/CDE attributes for the GDAC NetCDF. If
-  `COLUMN_ORDER` or the source file structure changes, update code and
-  fragment together.
-- **Generated-then-frozen** (`ECCC.xml`) — originally produced by ERDDAP's
-  GenerateDatasetsXml from the NCCSV files (which already carry column
-  metadata) and committed as-is; its datasetID
-  (`ECCCbuoys_2892_afd8_6091`) is deliberately frozen by being committed.
+- `skip_unchanged` (used by MEDS and Argo) compares destination size **and**
+  mtime. Object storage reports the `LastModified` of the upload, not the
+  source mtime, so on `s3://` the check degrades to **size-only** — a file
+  whose content changes without changing length will be skipped.
+- The ECCC consumer re-uploads the full station CSV on every AMQP message.
+  That is cheap locally but has a real cost against a versioned bucket — see
+  below.
 
-To help update a fragment when a dataset's **column set** changes, generate a
-fresh draft with ERDDAP's own tool and diff it against the committed fragment:
+## Inspecting the bucket
+
+The bucket is private, so there is no URL to open in a browser — reading it
+always means an authenticated client. Load the credentials into the
+environment first:
 
 ```sh
-scripts/generate-datasets-xml.sh meds   # -> logs/MEDS.draft.xml
-scripts/generate-datasets-xml.sh argo   # -> logs/ARGO_MEDS.draft.xml
-scripts/generate-datasets-xml.sh eccc   # -> logs/ECCC.draft.xml
+set -a; . ./.env; set +a
 ```
 
-Drafts are never installed automatically. New stations/floats/files that match
-a fragment's existing `fileNameRegex` need **no** fragment change — ERDDAP
-picks them up on reload (`updateEveryNMillis`, or immediately with
-`docker compose exec erddap touch /erddapData/flag/<datasetID>`).
+### With Python (no extra tooling)
 
-`scripts/DasDds.sh` validates a fragment's parsed types without a full reload.
-`ArgoFloats_Ifremer.xml` has no generator: it's a pure `EDDTableFromErddap`
-redirect (see below) — edit the committed fragment directly.
+`s3fs` is already a dependency, so pandas reads the bucket directly. This is
+the quickest way to spot-check a pipeline's output:
+
+```python
+import pandas as pd
+so = {"anon": False}          # picks up AWS_* from the environment
+
+# MEDS — plain CSV, reads as-is
+pd.read_csv("s3://cioos-juno-buoy-data/datasets/MEDS_CSV/C44131.csv",
+            storage_options=so, nrows=5)
+```
+
+ECCC needs one extra step. NCCSV puts ~230 lines of column metadata *before*
+the column-name row, so find `*END_METADATA*` and skip past it. Reading the
+file without this parses the metadata instead of the data: you get a
+three-column frame of `*GLOBAL*,attribute,value` rows, not the observations.
+
+```python
+import s3fs
+fs = s3fs.S3FileSystem(anon=False)
+key = "cioos-juno-buoy-data/datasets/ECCCbuoys/44488.csv"
+
+lines = fs.cat(key).decode().splitlines()
+skip = next(i for i, l in enumerate(lines) if "*END_METADATA*" in l) + 1
+pd.read_csv(f"s3://{key}", storage_options=so, skiprows=skip)
+```
+
+Argo publishes NetCDF, which needs `xarray` and a backend — neither is a
+dependency of this project (`uv add xarray h5netcdf` if you want them), and
+`xr.open_dataset` on a `_prof.nc` wants `engine="h5netcdf"` plus the
+`N_PROF`/`N_LEVELS` dimensions in mind.
+
+To list what's there:
+
+```python
+fs.find("cioos-juno-buoy-data/datasets")           # every key
+fs.ls("cioos-juno-buoy-data/datasets/MEDS_CSV")    # one dataset
+```
+
+### With rclone
+
+The best fit for browsing, and the only tool here that shows **noncurrent
+versions**. Not bundled with the project — install the current release
+(Ubuntu 24.04's `apt` package is 1.60.1 from 2022, which predates
+`--s3-versions`):
+
+```sh
+curl -sSLO https://downloads.rclone.org/rclone-current-linux-amd64.zip
+# verify against https://downloads.rclone.org/v<VERSION>/SHA256SUMS, then:
+unzip -q rclone-current-linux-amd64.zip
+install -m 755 rclone-v*/rclone ~/.local/bin/rclone
+```
+
+`rclone config` would write the credentials into
+`~/.config/rclone/rclone.conf` as a second plaintext copy. Defining the remote
+through environment variables instead keeps `.env` the only place they live —
+save this as `~/.juno-rclone.sh` and `.` it when you need the `juno:` remote:
+
+```sh
+# Source (don't run) this: `. ~/.juno-rclone.sh`. Absolute path so it works from
+# any directory — sourcing must not move the shell you're working in.
+set -a; . /path/to/cioos-co-data-ingestion-pipeline/.env; set +a
+export RCLONE_CONFIG=/dev/null          # silences the "no config file" notice
+export RCLONE_CONFIG_JUNO_TYPE=s3
+export RCLONE_CONFIG_JUNO_PROVIDER=Ceph
+export RCLONE_CONFIG_JUNO_ENDPOINT="$AWS_ENDPOINT_URL"
+export RCLONE_CONFIG_JUNO_REGION="$AWS_DEFAULT_REGION"
+export RCLONE_CONFIG_JUNO_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+export RCLONE_CONFIG_JUNO_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+export RCLONE_CONFIG_JUNO_FORCE_PATH_STYLE=true
+```
+
+(`RCLONE_CONFIG_<REMOTE>_<SETTING>` is the pattern, so `JUNO` is just the
+remote's name.)
+
+Every `rclone` command below needs those variables in *its* shell. Without them
+rclone falls back to `~/.config/rclone/rclone.conf` and fails with `didn't find
+section in config file ("juno")` — source the script again in each new terminal.
+
+Browsing:
+
+```sh
+rclone lsd  juno:                                    # buckets
+rclone tree juno:cioos-juno-buoy-data                # the whole tree
+rclone lsl  juno:cioos-juno-buoy-data/datasets       # sizes + timestamps
+rclone size juno:cioos-juno-buoy-data                # object count + total
+rclone ncdu juno:cioos-juno-buoy-data                # interactive size browser
+rclone cat --count 200 \
+  juno:cioos-juno-buoy-data/datasets/MEDS_CSV/C44131.csv   # peek, no download
+```
+
+Seeing what versioning is holding — neither pandas nor `aws s3 ls` shows this:
+
+```sh
+rclone lsf -R --s3-versions juno:cioos-juno-buoy-data
+rclone size      --s3-versions juno:cioos-juno-buoy-data
+```
+
+Deleted keys still appear here as noncurrent versions, which is the mechanism
+behind [the storage growth
+problem](#bucket-versioning-and-storage-growth).
+
+Mounting it as an ordinary folder (needs FUSE, present on most Linux hosts):
+
+```sh
+mkdir -p ~/juno-bucket
+rclone mount --read-only --daemon --vfs-cache-mode off \
+  juno:cioos-juno-buoy-data ~/juno-bucket
+ls ~/juno-bucket/datasets/            # ls, du, head, file managers all work
+fusermount3 -u ~/juno-bucket          # unmount
+```
+
+The daemon keeps the credentials it started with, so once it's up any shell can
+read `~/juno-bucket` without sourcing anything.
+
+Keep `--read-only` unless you mean to write; drop `--daemon` to watch the log
+in the foreground. If you ever *do* write with rclone, add
+`--s3-no-check-bucket` so a mistyped bucket name fails instead of creating a
+new bucket (the same hazard `publish_files` avoids by skipping `makedirs`).
+
+### With the AWS CLI
+
+What the
+[access doc](https://github.com/cioos-siooc/cioos-co-alliance-juno-infra/blob/main/docs/buoy-data-bucket-access.md)
+documents, and what the `aws s3 ls` examples elsewhere in this README assume —
+but it is not installed by default either (`uv tool install awscli`). Remember
+`--endpoint-url`, and note that `--profile` makes the CLI ignore `AWS_*`
+environment variables, so with a profile the keys must also be in
+`~/.aws/credentials`.
+
+### Sharing a file with someone who has no credentials
+
+Use a presigned URL (`boto3`'s `generate_presigned_url`, with
+`addressing_style: "path"` as everywhere else) rather than handing out the
+key, which grants write and delete across the whole CIOOS project. Keep the
+expiry short. This has not been exercised against this gateway yet — confirm
+it works before depending on it.
+
+### Viewing it as data rather than files
+
+For graphs, subsetting and OPeNDAP the answer is ERDDAP, which this repo no
+longer runs — see [ERDDAP](#erddap) for what it would take to point one at
+this bucket.
+
+## Bucket versioning and storage growth
+
+**The bucket is versioned, and this pipeline amplifies that hard. It needs a
+lifecycle rule.**
+
+### What versioning does
+
+A PUT to an existing key does not overwrite it. It creates a new *current*
+version and demotes the previous copy to a *noncurrent* version; both consume
+storage. `s3 rm` doesn't reclaim anything either — it writes a *delete marker*
+and leaves the old versions behind. So `aws s3 ls`, which lists only current
+versions, systematically under-reports true usage.
+
+This is a useful property in itself: a pipeline bug that overwrites good data
+is recoverable, so ask CIOOS before re-uploading from scratch.
+
+### Why this pipeline amplifies it
+
+[`swob_parser.py`](src/cioos_ingest/eccc/swob_parser.py) appends **one row**
+per AMQP message to the station's NCCSV, and
+[`consumer.py`](src/cioos_ingest/eccc/consumer.py) then publishes that path,
+which uploads the **whole file** (`publish.py`, `fs.put_file`). Every
+observation therefore re-uploads all history accumulated so far, and versioning
+retains every one of those cumulative snapshots. Retained bytes grow
+**quadratically** in observation count, not linearly.
+
+Order of magnitude per station per year, assuming hourly reporting. The file
+geometry is measured from a published station file: 103 columns, 361 B per data
+row, 20.7 KB of NCCSV header (234 lines of column metadata, which is why an
+almost-empty station file is still ~21 KB).
+
+| | |
+|---|---|
+| Uploads | ~8,760 |
+| Live file size after a year | ~3.2 MB |
+| Sum of all retained versions | `8760×20.7 KB + 361 B×8760²/2` ≈ **14 GB** |
+
+That is roughly 4,400× amplification — on the order of 1.4 TB/year across a
+~100-buoy feed backing ~320 MB of actual data. The reporting cadence and
+station count are assumptions, not measurements, but the shape holds at any
+plausible values.
+
+Argo has a milder form of the same thing: ~900 files of ~2 MB, each fully
+re-uploaded whenever a float adds a cycle.
+
+### What to do about it
+
+**Ask the CIOOS infrastructure team for a `NoncurrentVersionExpiration`
+lifecycle rule** on the bucket — e.g. expire noncurrent versions after 7 days.
+It is enforced server-side, needs no code, and can be added at any time; it
+bounds storage at roughly live data plus a week of churn while still leaving a
+week of recovery history.
+
+A deferred second measure, **not implemented here**: debounce ECCC publishes so
+each station uploads at most every N hours instead of once per message. At
+6-hourly that cuts generated bytes ~36×, and it composes with the lifecycle
+rule — the rule bounds retention, the debounce bounds what gets generated. The
+cost is up to N hours of publish latency.
+
+## ERDDAP
+
+The pipelines publish to object storage and stop there. ERDDAP — its compose
+stack, the bucket-sync sidecar, and the dataset fragments in `datasets.d/`
+(`ECCC_MSC_BUOYS`, `DFO_MEDS_BUOYS`, `DFO_MEDS_ARGO`) — lives in
+[cioos-siooc/cioos-co-erddap](https://github.com/cioos-siooc/cioos-co-erddap).
+If `meds_fix.COLUMN_ORDER` or a source file's structure changes here, update
+the matching fragment there in the same breath.
+
+`scripts/generate-datasets-xml.sh {eccc|meds|argo}` is kept here as a helper:
+it runs ERDDAP's GenerateDatasetsXml ad-hoc via `docker run` against a local
+`./datasets` (hydrate it from the bucket first — see the script header) and
+writes `logs/<NAME>.draft.xml` to diff against the fragment in cioos-co-erddap.
+`scripts/DasDds.sh` runs ERDDAP's DasDds the same way, to check a fragment's
+parsed types against that local `./datasets`.
 
 ## Pipeline notes
 
@@ -191,6 +431,10 @@ New stations extend two files in `config/eccc/` the first time they're seen:
 `ECCCbuoys_json_fields.json` (field mapping, gitignored — regenerated per
 environment) and `ECCCbuoys_types.json` (column types, checked in). Expect
 both to grow on a fresh queue.
+
+A station file with an incomplete NCCSV header is unreadable forever, so
+`validate_nccsv_header` gates every publish — a bad header is logged and
+dropped rather than uploaded.
 
 ### MEDS buoys (`cioos-ingest meds`)
 
@@ -214,24 +458,15 @@ per-float harvest unit (~900 Canadian floats, ~2 MB each).
 
 The flow mirrors those files with conditional GETs (unchanged floats cost one
 304 each) and publishes them; no fix step is needed since GDAC files are
-already CF-compliant Argo NetCDF — all reshaping happens in the fragment's
-`addAttributes`.
+already CF-compliant Argo NetCDF — all reshaping is described in the
+`ARGO_MEDS.xml` fragment's `addAttributes`.
 
-**Two integration versions** ship as fragments:
-
-| | v1 federate (`ArgoFloats_Ifremer.xml`) | v2 mirror (`ARGO_MEDS.xml` + this pipeline) |
-| --- | --- | --- |
-| Mechanism | `EDDTableFromErddap` redirect to Ifremer | Local files, `EDDTableFromMultidimNcFiles` |
-| Scope | **Entire global Argo** — cannot subset | Canadian (MEDS DAC) floats only |
-| Data hosting | None | ~2 GB for the full DAC |
-| Availability | Depends on Ifremer uptime (observed slow) | Local |
-| Metadata control | None (`addAttributes` forbidden) | Full (CDE-compatible attrs baked in) |
-
-**Why v1 can't be Canada-only:** `EDDTableFromErddap` is a pure redirect
-mirror (no `addAttributes`, no constraints), and no ERDDAP dataset type can
-bake a fixed row filter (e.g. `data_center="ME"`) over a remote server —
-subsetting requires owning the files, which is v2. v1 is included as a
-working demo of the federation mechanics.
+The alternative integration route — a pure `EDDTableFromErddap` redirect to
+Ifremer's global ArgoFloats, hosting no data — was carried for a while as
+`ArgoFloats_Ifremer.xml` and has been removed; see git history if it is ever
+wanted back. It covered all of global Argo but could not subset to Canadian
+floats or control metadata, and was not CDE-harvestable. Mirroring (this
+pipeline) is what buys Canadian scope and CDE-compatible attributes.
 
 Production notes: the GDACs also offer rsync (`vdmzrs.ifremer.fr`) — the
 better transport when mirroring the full DAC; HTTP conditional-GET keeps this
